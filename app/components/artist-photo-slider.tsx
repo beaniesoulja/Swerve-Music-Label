@@ -5,8 +5,6 @@ import { useEffect, useState } from "react";
 const slides = [
   { src: "/artist/beanie-soulja/primary-studio.jpg", alt: "Beanie Soulja in a dark studio portrait", label: "Official portrait", note: "Press / artist profile" },
   { src: "/artist/beanie-soulja/studio-full-body.jpg", alt: "Beanie Soulja in a dark full-body studio portrait", label: "Studio series", note: "Campaign / booking" },
-  { src: "/artist/beanie-soulja/orange-portrait.jpg", alt: "Beanie Soulja in an orange campaign portrait", label: "Campaign color", note: "Release moments" },
-  { src: "/artist/beanie-soulja/black-white-portrait.jpg", alt: "Black-and-white portrait of Beanie Soulja", label: "Monochrome", note: "Editorial / press" },
   { src: "/artist/beanie-soulja/interview-microphone.jpg", alt: "Beanie Soulja speaking into a microphone", label: "In conversation", note: "Interview / live" },
   { src: "/artist/beanie-soulja/culture-event.jpg", alt: "Beanie Soulja at a cultural event", label: "In the room", note: "Culture / community" },
   { src: "/artist/beanie-soulja/travel-pyramid.jpg", alt: "Beanie Soulja visiting the pyramids in Egypt", label: "Across borders", note: "World culture" },

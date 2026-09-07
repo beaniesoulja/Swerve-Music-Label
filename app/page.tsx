@@ -7,6 +7,7 @@ import CursorGlow from "./components/cursor-glow";
 import TiltCard from "./components/tilt-card";
 import MarqueeTicker from "./components/marquee-ticker";
 import MobileNav from "./components/mobile-nav";
+import EventStoryRow from "./components/event-story-row";
 
 const appleArtist = "https://music.apple.com/us/artist/beanie-soulja/1547405349";
 const spotifyArtist = "https://open.spotify.com/artist/5kHeG9h2dDcpwthkGOBQ5D?si=_81GgrGIRrawneV3YdnKyw";
@@ -247,9 +248,10 @@ export default function Home() {
           <p className="section-intro">Stories about the people, places and ideas shaping the sound—not just the moment around it.</p>
         </div>
         <div className="story-list">
+          <EventStoryRow />
           {stories.map(([tag, title], index) => (
-            <article key={title} data-reveal style={{ transitionDelay: `${index * 90}ms` }}>
-              <span className={`story-number story-tone-${index + 1}`}>{String(index + 1).padStart(2, "0")}</span>
+            <article key={title} data-reveal style={{ transitionDelay: `${(index + 1) * 90}ms` }}>
+              <span className="story-marker" aria-hidden="true">◆</span>
               <span className="story-tag">{tag}</span>
               <h3>{title}</h3>
               <span className="story-arrow">↗</span>
