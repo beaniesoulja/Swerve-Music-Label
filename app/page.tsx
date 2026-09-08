@@ -8,6 +8,7 @@ import TiltCard from "./components/tilt-card";
 import MarqueeTicker from "./components/marquee-ticker";
 import MobileNav from "./components/mobile-nav";
 import EventStoryRow from "./components/event-story-row";
+import CatalogueCoverflow from "./components/catalogue-coverflow";
 
 const appleArtist = "https://music.apple.com/us/artist/beanie-soulja/1547405349";
 const spotifyArtist = "https://open.spotify.com/artist/5kHeG9h2dDcpwthkGOBQ5D?si=_81GgrGIRrawneV3YdnKyw";
@@ -212,30 +213,8 @@ export default function Home() {
           </div>
           <p className="section-intro">Seven supplied masters, presented as 30-second website previews with links to the artist&apos;s official streaming profiles.</p>
         </div>
-        <div className="catalogue-grid">
-          {catalogue.map((track, index) => (
-            <article className="track-card" key={track.title} data-reveal style={{ transitionDelay: `${(index % 3) * 80}ms` }}>
-              <div className="track-cover-wrap">
-                <img src={track.cover} alt={`${track.title} cover artwork`} />
-                <span>{String(index + 1).padStart(2, "0")}</span>
-              </div>
-              <div className="track-meta">
-                <span>{track.year} · {track.duration}</span>
-                <h3>{track.title}</h3>
-                <p>{track.credit}</p>
-              </div>
-              <IosMusicPlayer
-                src={track.audio}
-                title={track.title}
-                artist={track.credit}
-                cover={track.cover}
-              />
-              <div className="track-links">
-                <a href={track.apple} target="_blank" rel="noreferrer">Apple Music ↗</a>
-                <a href={spotifyArtist} target="_blank" rel="noreferrer">Spotify ↗</a>
-              </div>
-            </article>
-          ))}
+        <div data-reveal>
+          <CatalogueCoverflow tracks={catalogue} spotifyArtist={spotifyArtist} />
         </div>
       </section>
 
