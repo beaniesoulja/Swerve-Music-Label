@@ -9,7 +9,12 @@ type IosMusicPlayerProps = {
   artist: string;
   cover: string;
   variant?: "featured" | "compact";
+  showVolume?: boolean;
+  volume?: number;
+  onVolumeChange?: (value: number) => void;
 };
+
+const DEFAULT_VOLUME = 0.3;
 
 function formatTime(value: number) {
   if (!Number.isFinite(value) || value < 0) return "0:00";
@@ -62,14 +67,23 @@ export default function IosMusicPlayer({
   artist,
   cover,
   variant = "compact",
+  showVolume,
+  volume: controlledVolume,
+  onVolumeChange,
 }: IosMusicPlayerProps) {
+  const shouldShowVolume = showVolume ?? variant === "featured";
   const audioRef = useRef<HTMLAudioElement>(null);
   const playerId = useId();
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(30);
-  const [volume, setVolume] = useState(0.82);
+  const [internalVolume, setInternalVolume] = useState(controlledVolume ?? DEFAULT_VOLUME);
   const [muted, setMuted] = useState(false);
+  const volume = controlledVolume ?? internalVolume;
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume;
+  }, [volume]);
 
   useEffect(() => {
     const pauseForAnotherPlayer = (event: Event) => {
@@ -116,7 +130,8 @@ export default function IosMusicPlayer({
     audio.volume = value;
     audio.muted = false;
     setMuted(false);
-    setVolume(value);
+    setInternalVolume(value);
+    onVolumeChange?.(value);
   };
 
   const toggleMute = () => {
@@ -181,7 +196,7 @@ export default function IosMusicPlayer({
         <button type="button" className="ios-skip" onClick={() => skip(10)} aria-label={`Go forward 10 seconds in ${title}`}><ForwardTenIcon /></button>
       </div>
 
-      {variant === "featured" && (
+      {shouldShowVolume && (
         <div className="ios-volume">
           <button type="button" onClick={toggleMute} aria-label={muted ? "Unmute preview" : "Mute preview"}><SpeakerIcon muted={muted} /></button>
           <input

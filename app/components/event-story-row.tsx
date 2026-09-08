@@ -1,16 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import CoverflowGallery from "./coverflow-gallery";
 
-const PHOTO_COUNT = 29;
+const PHOTO_COUNT = 186;
+const LOCATION = "OhOhBeeHive · Akure, Ondo State";
+const LABELS = ["On the Red Carpet", "Center Stage", "Crowd Energy", "In the Mix", "Live n Loud", "The Performance", "Backstage Moments"];
+
 const photos = Array.from({ length: PHOTO_COUNT }, (_, i) => {
   const n = String(i + 1).padStart(2, "0");
-  return { src: `/culture/live-n-loud/${n}.jpg`, alt: `Live n Loud Edition of Sterling Chilling, photo ${i + 1}` };
+  return {
+    src: `/culture/live-n-loud/${n}.jpg`,
+    alt: `Live n Loud Edition of Sterling Chilling, photo ${i + 1}`,
+    label: LABELS[i % LABELS.length],
+    location: LOCATION,
+  };
 });
 
 export default function EventStoryRow() {
   const [open, setOpen] = useState(false);
-  const [lightbox, setLightbox] = useState<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelHeight, setPanelHeight] = useState(0);
 
@@ -26,21 +34,6 @@ export default function EventStoryRow() {
     observer.observe(el);
     return () => observer.disconnect();
   }, [open]);
-
-  useEffect(() => {
-    if (lightbox === null) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setLightbox(null);
-      if (event.key === "ArrowRight") setLightbox((i) => (i === null ? i : (i + 1) % photos.length));
-      if (event.key === "ArrowLeft") setLightbox((i) => (i === null ? i : (i - 1 + photos.length) % photos.length));
-    };
-    window.addEventListener("keydown", onKey);
-    document.body.classList.add("scroll-locked");
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.classList.remove("scroll-locked");
-    };
-  }, [lightbox]);
 
   return (
     <article className="story-list-item event-story" data-reveal>
@@ -58,42 +51,42 @@ export default function EventStoryRow() {
         aria-hidden={!open}
         ref={panelRef}
       >
-        <div className="event-story-copy">
-          <p>
-            OOB Records &amp; Swerve Music brought electrifying entertainment to Akure, Ondo State, with the premiere of the
+        <div className="magazine">
+          <p className="magazine-kicker">Event Report · Swerve Music Presents</p>
+          <p className="magazine-byline">Akure, Ondo State — OhOhBeeHive</p>
+
+          <p className="magazine-lead">
+            <span className="magazine-highlight">OOB Records &amp; Swerve Music</span> brought electrifying entertainment to Akure, Ondo State, with the premiere of the
             Live n Loud Edition of Sterling Chilling at OhOhBeeHive. The event gathered music fans and entertainment
             lovers for a night of fine taste, distinguished company, and unforgettable energy.
           </p>
+
           <p>
-            The stage came alive with performances from Easyscope, Kabex, Hvnter, Oria, BEEJAY, and AY Smush. Each
-            artist brought their own flavour to the night, keeping the crowd engaged and the atmosphere buzzing. From
-            the performances to the audience&apos;s infectious enthusiasm, the energy was unmatched.
+            The stage came alive with performances from <strong className="magazine-artist">Easyscope</strong>,{" "}
+            <strong className="magazine-artist">Kabex</strong>, <strong className="magazine-artist">Hvnter</strong>,{" "}
+            <strong className="magazine-artist">Oria</strong>, <strong className="magazine-artist">BEEJAY</strong>, and{" "}
+            <strong className="magazine-artist">AY Smush</strong>. Each artist brought their own flavour to the night,
+            keeping the crowd engaged and the atmosphere buzzing.
           </p>
+
+          <blockquote className="magazine-pullquote">
+            &ldquo;From the performances to the audience&apos;s infectious enthusiasm, the energy was unmatched.&rdquo;
+          </blockquote>
+
+          <div className="magazine-gallery">
+            <CoverflowGallery photos={photos} />
+          </div>
+
           <p>
             Gaming also took the spotlight as Kabex and Dante faced off in an exciting FC26 showdown. Kabex emerged
             victorious, claiming the ₦5 million prize and adding another memorable moment to the celebration. With
             music, gaming, and great company sharing the spotlight, Sterling Chilling&apos;s Live n Loud Edition
             delivered a night to remember.
           </p>
-        </div>
-        <div className="event-story-gallery">
-          {photos.map((photo, index) => (
-            <button type="button" className="event-story-thumb" key={photo.src} onClick={() => setLightbox(index)}>
-              <img src={photo.src} alt={photo.alt} loading="lazy" />
-            </button>
-          ))}
+
+          <p className="magazine-credit">Photography: Swerve Music &amp; OhOhBeeHive · {photos.length} frames from the night</p>
         </div>
       </div>
-
-      {lightbox !== null && (
-        <div className="event-lightbox" role="dialog" aria-modal="true" aria-label="Live n Loud Edition photo viewer">
-          <button type="button" className="event-lightbox-close" onClick={() => setLightbox(null)} aria-label="Close photo viewer">✕</button>
-          <button type="button" className="event-lightbox-nav event-lightbox-prev" onClick={() => setLightbox((i) => (i === null ? i : (i - 1 + photos.length) % photos.length))} aria-label="Previous photo">←</button>
-          <img src={photos[lightbox].src} alt={photos[lightbox].alt} />
-          <button type="button" className="event-lightbox-nav event-lightbox-next" onClick={() => setLightbox((i) => (i === null ? i : (i + 1) % photos.length))} aria-label="Next photo">→</button>
-          <span className="event-lightbox-count">{String(lightbox + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}</span>
-        </div>
-      )}
     </article>
   );
 }
