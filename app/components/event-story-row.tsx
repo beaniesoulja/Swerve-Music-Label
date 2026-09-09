@@ -53,7 +53,7 @@ export default function EventStoryRow() {
       >
         <div className="magazine">
           <p className="magazine-kicker">Event Report · Swerve Music Presents</p>
-          <p className="magazine-byline">Akure, Ondo State — OhOhBeeHive</p>
+          <p className="magazine-byline">Akure, Ondo State · OhOhBeeHive</p>
 
           <p className="magazine-lead">
             <span className="magazine-highlight">OOB Records &amp; Swerve Music</span> brought electrifying entertainment to Akure, Ondo State, with the premiere of the

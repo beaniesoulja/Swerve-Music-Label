@@ -30,26 +30,6 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-@media (pointer: fine) {
-  .cursor-glow {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 34px;
-    height: 34px;
-    margin: -17px;
-    border-radius: 50%;
-    background: var(--purple);
-    opacity: .55;
-    filter: blur(2px);
-    pointer-events: none;
-    z-index: 998;
-    transition: width .25s var(--ease-out), height .25s var(--ease-out), margin .25s var(--ease-out), opacity .25s ease;
-  }
-  .cursor-glow.is-active { width: 64px; height: 64px; margin: -32px; opacity: .32; }
-}
-@media (pointer: coarse) { .cursor-glow { display: none; } }
-
 [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity .8s var(--ease-out), transform .8s var(--ease-out); }
 [data-reveal].is-visible { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { [data-reveal] { opacity: 1; transform: none; transition: none; } }
