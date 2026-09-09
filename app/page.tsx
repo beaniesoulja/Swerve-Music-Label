@@ -3,7 +3,6 @@ import ArtistPhotoSlider from "./components/artist-photo-slider";
 import IosMusicPlayer from "./components/ios-music-player";
 import ScrollReveal from "./components/scroll-reveal";
 import HeaderScrollWatcher from "./components/header-scroll-watcher";
-import CursorGlow from "./components/cursor-glow";
 import TiltCard from "./components/tilt-card";
 import MarqueeTicker from "./components/marquee-ticker";
 import MobileNav from "./components/mobile-nav";
@@ -16,7 +15,7 @@ const spotifyArtist = "https://open.spotify.com/artist/5kHeG9h2dDcpwthkGOBQ5D?si
 const focusAreas = [
   ["01", "Music", "Release strategy, artist storytelling and songs built to travel."],
   ["02", "Live", "Showcases, festival placements and booking support for independent talent."],
-  ["03", "Culture", "Afrobeats at the center—open to art, dance, fashion and global exchange."],
+  ["03", "Culture", "Afrobeats at the center, open to art, dance, fashion and global exchange."],
 ];
 
 const catalogue = [
@@ -96,7 +95,6 @@ export default function Home() {
     <main>
       <ScrollReveal />
       <HeaderScrollWatcher />
-      <CursorGlow />
 
       <header className="site-header">
         <a className="brand" href="#top" aria-label="Swerve Music home">
@@ -117,7 +115,7 @@ export default function Home() {
         <div className="hero-copy" data-reveal>
           <p className="eyebrow">Independent artist label · Lagos, Nigeria</p>
           <h1>We move<br />music <em>forward.</em></h1>
-          <p className="hero-deck">Swerve Music promotes art, music and culture—rooted in Afrobeats, built with independent artists and open to the world.</p>
+          <p className="hero-deck">Swerve Music promotes art, music and culture. Rooted in Afrobeats, built with independent artists and open to the world.</p>
           <div className="hero-actions">
             <a className="button button-dark" href="#music">Hear Beanie Soulja <span>↗</span></a>
             <a className="text-link" href="#contact">Submit your music <span>→</span></a>
@@ -224,7 +222,7 @@ export default function Home() {
             <p className="eyebrow">Beyond the release</p>
             <h2>Culture is the context.</h2>
           </div>
-          <p className="section-intro">Stories about the people, places and ideas shaping the sound—not just the moment around it.</p>
+          <p className="section-intro">Stories about the people, places and ideas shaping the sound, not just the moment around it.</p>
         </div>
         <div className="story-list">
           <EventStoryRow />
