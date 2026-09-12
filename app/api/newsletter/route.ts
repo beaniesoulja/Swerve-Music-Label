@@ -6,7 +6,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function routeError(error: unknown) {
   const message = error instanceof Error ? error.message : "Unexpected error";
-  if (message.includes("no such table") || message.includes("newsletter_subscribers")) {
+  if (message.includes("does not exist") || message.includes("newsletter_subscribers")) {
     return "Newsletter storage is being prepared. Please try again shortly.";
   }
   return "We could not add you right now. Please try again.";
