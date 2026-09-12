@@ -33,7 +33,19 @@ const localBindingConfig = {
     : [],
 };
 
+// Vercel (and other Nitro-supported hosts) build with `VINEXT_TARGET=vercel`
+// set, skipping the Cloudflare-only plugin and its D1/R2 bindings.
+const useNitro = process.env.VINEXT_TARGET === "vercel" || Boolean(process.env.VERCEL);
+
 export default defineConfig(async () => {
+  if (useNitro) {
+    const { nitro } = await import("nitro/vite");
+    const tailwindcss = (await import("@tailwindcss/vite")).default;
+    return {
+      plugins: [vinext(), sites(), tailwindcss(), nitro()],
+    };
+  }
+
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
   process.env.WRANGLER_WRITE_LOGS ??= "false";
