@@ -262,6 +262,28 @@ body.scroll-locked { overflow: hidden; }
 .coverflow-dots button.is-active { width: 20px; border-radius: 4px; background: var(--purple); }
 .coverflow-progress { width: 140px; height: 4px; border-radius: 4px; background: rgba(34,34,34,.15); overflow: hidden; }
 .coverflow-progress div { height: 100%; background: var(--purple); transition: width .3s ease; }
+.coverflow-card.is-active { cursor: zoom-in; }
+
+.lightbox { position: fixed; inset: 0; z-index: 300; background: rgba(20,18,26,.96); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 70px 6vw 90px; }
+.lightbox-frame { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.lightbox-image-toggle { border: 0; padding: 0; margin: 0; background: transparent; max-width: 100%; max-height: 100%; display: flex; }
+.lightbox-frame img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; transition: transform .25s var(--ease-out); box-shadow: 0 30px 70px rgba(0,0,0,.5); touch-action: none; user-select: none; }
+.lightbox-frame img.is-zoomed { cursor: grab; transition: none; }
+.lightbox-close { position: absolute; top: 22px; right: 5vw; width: 44px; height: 44px; border: 0; background: rgba(255,253,212,.12); color: var(--cream); font-size: 18px; cursor: pointer; z-index: 2; }
+.lightbox-close:hover { background: var(--purple); }
+.lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; border: 0; background: rgba(255,253,212,.12); color: var(--cream); font-size: 20px; cursor: pointer; z-index: 2; }
+.lightbox-nav:hover { background: var(--purple); }
+.lightbox-prev { left: 3vw; }
+.lightbox-next { right: 3vw; }
+.lightbox-footer { position: absolute; bottom: 26px; left: 0; right: 0; display: flex; justify-content: center; gap: 18px; color: rgba(255,253,212,.6); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-align: center; padding: 0 6vw; }
+
+@media (max-width: 700px) {
+  .lightbox { padding: 60px 4vw 80px; }
+  .lightbox-nav { width: 40px; height: 40px; font-size: 16px; }
+  .lightbox-prev { left: 2vw; }
+  .lightbox-next { right: 2vw; }
+  .lightbox-footer { flex-direction: column; gap: 6px; }
+}
 
 @media (max-width: 900px) {
   .event-story-toggle { grid-template-columns: 44px 1fr 40px; gap: 12px; min-height: auto; padding: 30px 0; }

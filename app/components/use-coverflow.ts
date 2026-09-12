@@ -4,43 +4,56 @@ import { useCallback, useRef, useState } from "react";
 import type { CSSProperties, KeyboardEvent, PointerEvent } from "react";
 
 const DRAG_THRESHOLD = 50;
+const MOVE_THRESHOLD = 6;
 
 export function useCoverflow(count: number) {
   const [active, setActive] = useState(0);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const dragState = useRef<{ startX: number; pointerId: number | null }>({
+  const dragState = useRef<{ startX: number; pointerId: number | null; moved: boolean }>({
     startX: 0,
     pointerId: null,
+    moved: false,
   });
 
   const goTo = useCallback((index: number) => setActive(((index % count) + count) % count), [count]);
   const next = useCallback(() => goTo(active + 1), [active, goTo]);
   const prev = useCallback(() => goTo(active - 1), [active, goTo]);
 
+  // Pointer tracking starts on pointerdown, but no React state changes until real
+  // movement is detected — otherwise every plain click/tap forces a re-render
+  // between pointerdown and pointerup, which can shift the overlapping 3D cards
+  // just enough that the browser never fires a "click" on the tapped card.
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    dragState.current = { startX: event.clientX, pointerId: event.pointerId };
-    setIsDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    dragState.current = { startX: event.clientX, pointerId: event.pointerId, moved: false };
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (dragState.current.pointerId === null) return;
-    setDragX(event.clientX - dragState.current.startX);
+    const delta = event.clientX - dragState.current.startX;
+    if (!dragState.current.moved) {
+      if (Math.abs(delta) < MOVE_THRESHOLD) return;
+      dragState.current.moved = true;
+      setIsDragging(true);
+      event.currentTarget.setPointerCapture(dragState.current.pointerId);
+    }
+    setDragX(delta);
   };
 
   const endDrag = (event: PointerEvent<HTMLDivElement>) => {
     if (dragState.current.pointerId === null) return;
-    try {
-      event.currentTarget.releasePointerCapture(dragState.current.pointerId);
-    } catch {
-      // pointer already released
+    if (dragState.current.moved) {
+      try {
+        event.currentTarget.releasePointerCapture(dragState.current.pointerId);
+      } catch {
+        // pointer already released
+      }
+      setIsDragging(false);
+      if (dragX <= -DRAG_THRESHOLD) next();
+      else if (dragX >= DRAG_THRESHOLD) prev();
+      setDragX(0);
     }
     dragState.current.pointerId = null;
-    setIsDragging(false);
-    if (dragX <= -DRAG_THRESHOLD) next();
-    else if (dragX >= DRAG_THRESHOLD) prev();
-    setDragX(0);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
