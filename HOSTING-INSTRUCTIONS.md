@@ -37,7 +37,5 @@ The existing configuration is Cloudflare-compatible. Give the provider this enti
 
 ## Important
 
-- No ChatGPT authentication is implemented in the website source.
-- Authentication seen on a previous hosted URL was imposed by that hosting platform, not by this application.
 - The full website is not intentionally deployed by this package; deployment happens only when a hosting provider runs it.
 - The included song files are 30-second promotional previews. Full masters are excluded from this hosting ZIP.
