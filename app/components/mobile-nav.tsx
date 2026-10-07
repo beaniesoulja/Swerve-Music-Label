@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const links = [
   { href: "#artists", label: "Artist" },
@@ -12,6 +12,14 @@ const links = [
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 701px)");
+    const onResize = () => { if (desktop.matches) setOpen(false); };
+    desktop.addEventListener("change", onResize);
+    return () => desktop.removeEventListener("change", onResize);
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle("mobile-nav-open", open);
@@ -21,7 +29,10 @@ export default function MobileNav() {
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -30,6 +41,7 @@ export default function MobileNav() {
   return (
     <div className="mobile-nav">
       <button
+        ref={toggleRef}
         type="button"
         className="mobile-nav-toggle"
         aria-expanded={open}
@@ -39,7 +51,7 @@ export default function MobileNav() {
       >
         <span /><span /><span />
       </button>
-      <div id="mobile-nav-panel" className={`mobile-nav-panel${open ? " is-open" : ""}`} aria-hidden={!open}>
+      <div id="mobile-nav-panel" className={`mobile-nav-panel${open ? " is-open" : ""}`} inert={!open} aria-hidden={!open}>
         <nav aria-label="Mobile navigation">
           {links.map((link) => (
             <a href={link.href} key={link.href} onClick={() => setOpen(false)} tabIndex={open ? 0 : -1}>

@@ -1,125 +1,52 @@
-# Swerve Music Label Website
+# Swerve Music website
 
-A responsive Swerve Music label site featuring sole current artist Beanie Soulja, seven 30-second catalogue previews, official Apple Music and Spotify profile links, booking/artist calls to action and an operational newsletter signup. Subscriber names, email addresses, consent time, source and status are stored in the Cloudflare D1 `newsletter_subscribers` table. Duplicate emails safely refresh the subscriber name, status and consent time.
+Swerve Music's artist website with Beanie Soulja, seven 30-second previews, a five-photo artist slider, and the 186-image Live n Loud event gallery.
 
-## Artist audio and imagery
+## Local development
 
-- Preview audio: `public/audio/` — 30-second, 128 kbps MP3 excerpts encoded from the seven user-supplied masters.
-- Release artwork: `public/covers/` — art extracted from the supplied masters.
-- FOWOSERE uses the corrected public artwork reading `SWERVE MUSIC`; the original embedded source is preserved in folder 14 of the master brand package.
-- Full masters stay outside the public website directory. Full listening is routed to the official streaming profiles.
-- Artist imagery: `public/artist/beanie-soulja/` — optimized derivatives of the user-supplied studio, interview, culture and travel images. All source originals remain in folder 14 of the master package.
-- Artist photography is presented as a seven-image, one-at-a-time carousel with manual controls and timed progression.
-- Catalogue order is TKL, THE MOTTO, Capsize, Burst Down, FOWOSERE, PSYCHO and NSG.
-- Burst Down uses `burst-down-preview-v3.mp3`, freshly encoded from the replacement master supplied on 12 August 2026 so browsers cannot reuse the earlier catalogue audio.
+Use Node.js 22.13+ and npm. `package-lock.json` is the authoritative lockfile.
 
-## Newsletter database
-
-- Schema: `db/schema.ts`
-- Generated migrations: `drizzle/`
-- API endpoint: `POST /api/newsletter`
-- D1 binding: `DB` (declared in `.openai/hosting.json`)
-- Required fields: name, valid email address and explicit newsletter consent
-
-Generate a new migration after any future schema edit with `pnpm db:generate`. The Sites deployment workflow provisions the D1 database and applies the generated migration.
-
-## Site runtime
-
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
-
-## Prerequisites
-
-- Node.js `>=22.13.0`
-
-## Quick Start
-
-```bash
-npm install
-npm run dev
-npm run build
+```sh
+npm ci
+npm run dev -- --port 4173
 ```
 
-This starter does not use `wrangler.jsonc`.
+The site works without secrets. Contact links and newsletter signup show an unavailable message until their services are configured. Do not put secrets in public environment variables.
 
-## Included Shape
+## Verification
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
-
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```sh
+npm test
+VINEXT_TARGET=vercel npm run build
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+`npm test` runs TypeScript, ESLint, in-memory PostgreSQL newsletter tests, a Cloudflare build, and production-render/API checks. Tests use synthetic data and a stub email transport; they do not contact a live database or send email. Run tests in a shell without real newsletter environment variables.
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+## Database and newsletter
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+The current database is **Neon PostgreSQL**, using Drizzle and `@neondatabase/serverless`. There is no newsletter D1 binding. Configuration is listed in `.env.example` and [HOSTING-INSTRUCTIONS.md](HOSTING-INSTRUCTIONS.md).
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+```sh
+npm run db:generate
+npm run db:migrate
+```
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+Generate migrations after schema changes. Apply migrations to an isolated test database first, using `DATABASE_URL_UNPOOLED`. The repository's tests also execute the committed SQL migrations using PGlite.
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+Signup requires confirmation by email before activating a subscription. Links expire after 24 hours and are single use. Visiting the confirmation/unsubscribe page does not mutate data; the visitor must submit its form. Confirmed subscriber names cannot be overwritten through public signup. Unsubscribe remains available when new signup is disabled.
 
-## Useful Commands
+The email adapter uses the Resend HTTP API. No account or API key is bundled. Shared PostgreSQL counters limit attempts to 3 per email/hour and 200 globally/hour; an explicitly configured trusted proxy header adds a 20 per IP/hour limit. Stored rate keys are HMACs. Configure host-level request protection too.
 
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+`npm run newsletter:export` prints a CSV of confirmed, currently subscribed addresses with personalized unsubscribe URLs. It is an operator-only command and contains personal data. Store its output securely. Refresh immediately before an approved campaign and ensure the sender respects current suppressions; do not reuse stale exports. A campaign dashboard/send automation is not included. Legacy rows without confirmed consent are excluded until the person confirms again.
 
-## Learn More
+## Media and content
 
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+- The current Burst Down audio is `public/audio/burst-down-preview-v3.mp3`. Old preview paths redirect to it.
+- Full music masters are not public assets.
+- Artist photography loads one selected image at a time; the slideshow starts paused and supports user-controlled playback.
+- Responsive WebP artist images preserve the originals and can be regenerated with `npm run images:optimize`.
+- The event gallery lazily renders only nearby images and uses a native modal for zoom.
+- Unused public assets and old pnpm configuration were preserved in `archive/`.
+- Unfinished story rows, non-clickable social names, and the unverified weekly-release promise were removed. Only configured real social links appear.
+
+See [audit/OWNER-SETUP.md](audit/OWNER-SETUP.md) for remaining owner inputs and [audit/FIX-STATUS.md](audit/FIX-STATUS.md) for verification results.

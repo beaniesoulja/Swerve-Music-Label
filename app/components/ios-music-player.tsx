@@ -12,6 +12,8 @@ type IosMusicPlayerProps = {
   showVolume?: boolean;
   volume?: number;
   onVolumeChange?: (value: number) => void;
+  muted?: boolean;
+  onMutedChange?: (value: boolean) => void;
 };
 
 const DEFAULT_VOLUME = 0.3;
@@ -70,6 +72,8 @@ export default function IosMusicPlayer({
   showVolume,
   volume: controlledVolume,
   onVolumeChange,
+  muted: controlledMuted,
+  onMutedChange,
 }: IosMusicPlayerProps) {
   const shouldShowVolume = showVolume ?? variant === "featured";
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -78,12 +82,20 @@ export default function IosMusicPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(30);
   const [internalVolume, setInternalVolume] = useState(controlledVolume ?? DEFAULT_VOLUME);
-  const [muted, setMuted] = useState(false);
+  const [internalMuted, setInternalMuted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const muted = controlledMuted ?? internalMuted;
+  const setMuted = (value: boolean) => { setInternalMuted(value); onMutedChange?.(value); };
   const volume = controlledVolume ?? internalVolume;
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
   }, [volume]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.muted = muted;
+  }, [muted]);
 
   useEffect(() => {
     const pauseForAnotherPlayer = (event: Event) => {
@@ -100,11 +112,17 @@ export default function IosMusicPlayer({
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
+      setError("");
+      setLoading(true);
       window.dispatchEvent(new CustomEvent("swerve-audio-play", { detail: playerId }));
       try {
+        if (audio.error) audio.load();
         await audio.play();
       } catch {
         setPlaying(false);
+        setError("This preview could not play. Check your connection and try again.");
+      } finally {
+        setLoading(false);
       }
     } else {
       audio.pause();
@@ -151,12 +169,17 @@ export default function IosMusicPlayer({
       <audio
         ref={audioRef}
         src={src}
+        muted={muted}
         preload="metadata"
         onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 30)}
         onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
-        onPlay={() => setPlaying(true)}
+        onPlay={() => { setPlaying(true); setError(""); }}
+        onPlaying={() => setLoading(false)}
+        onWaiting={() => setLoading(true)}
+        onCanPlay={() => setLoading(false)}
+        onError={() => { setLoading(false); setPlaying(false); setError("This preview is unavailable. Try again or listen on a streaming service."); }}
         onPause={() => setPlaying(false)}
-        onEnded={() => { setPlaying(false); setCurrentTime(0); }}
+        onEnded={(event) => { event.currentTarget.currentTime = 0; setPlaying(false); setCurrentTime(0); }}
       />
 
       {variant === "featured" && (
@@ -192,9 +215,11 @@ export default function IosMusicPlayer({
 
       <div className="ios-controls">
         <button type="button" className="ios-skip" onClick={() => skip(-10)} aria-label={`Go back 10 seconds in ${title}`}><BackTenIcon /></button>
-        <button type="button" className="ios-play" onClick={togglePlayback} aria-label={`${playing ? "Pause" : "Play"} ${title}`}><PlayIcon playing={playing} /></button>
+        <button type="button" className="ios-play" onClick={togglePlayback} aria-busy={loading} aria-label={`${playing ? "Pause" : "Play"} ${title}`}><PlayIcon playing={playing} /></button>
         <button type="button" className="ios-skip" onClick={() => skip(10)} aria-label={`Go forward 10 seconds in ${title}`}><ForwardTenIcon /></button>
       </div>
+
+      <p className="audio-status" role="status" aria-live="polite">{error || (loading ? "Loading preview…" : "")}</p>
 
       {shouldShowVolume && (
         <div className="ios-volume">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { useCoverflow } from "./use-coverflow";
 
 export type CoverflowPhoto = {
@@ -21,6 +21,9 @@ export default function CoverflowGallery({ photos }: { photos: CoverflowPhoto[] 
   const current = photos[active];
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(MIN_ZOOM);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const panDrag = useRef<{ startX: number; startY: number; originX: number; originY: number; pointerId: number | null }>({
@@ -40,16 +43,31 @@ export default function CoverflowGallery({ photos }: { photos: CoverflowPhoto[] 
 
   useEffect(() => {
     if (!lightboxOpen) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const stage = stageRef.current;
+    const dialog = dialogRef.current;
+    dialog?.showModal();
     document.body.classList.add("scroll-locked");
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setLightboxOpen(false);
-      else if (event.key === "ArrowRight") next();
-      else if (event.key === "ArrowLeft") prev();
+      if (event.key === "ArrowRight") { event.preventDefault(); next(); }
+      else if (event.key === "ArrowLeft") { event.preventDefault(); prev(); }
     };
-    window.addEventListener("keydown", onKey);
+    const frame = frameRef.current;
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      setZoom((current) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, current - event.deltaY * 0.0025)));
+    };
+    dialog?.addEventListener("keydown", onKey);
+    frame?.addEventListener("wheel", onWheel, { passive: false });
     return () => {
       document.body.classList.remove("scroll-locked");
-      window.removeEventListener("keydown", onKey);
+      dialog?.removeEventListener("keydown", onKey);
+      frame?.removeEventListener("wheel", onWheel);
+      dialog?.close();
+      const returnTarget = opener?.isConnected && opener.getAttribute("aria-hidden") !== "true"
+        ? opener
+        : stage?.querySelector<HTMLButtonElement>(".is-active");
+      returnTarget?.focus({ preventScroll: true });
     };
   }, [lightboxOpen, next, prev]);
 
@@ -60,11 +78,6 @@ export default function CoverflowGallery({ photos }: { photos: CoverflowPhoto[] 
     } else {
       setZoom(ZOOM_STEP);
     }
-  };
-
-  const onWheelZoom = (event: ReactWheelEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setZoom((current) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, current - event.deltaY * 0.0025)));
   };
 
   const onPanPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -91,14 +104,19 @@ export default function CoverflowGallery({ photos }: { photos: CoverflowPhoto[] 
   };
 
   return (
-    <div className="coverflow" aria-roledescription="carousel" aria-label="Live n Loud Edition photo carousel">
+    <div className="coverflow" role="region" aria-roledescription="carousel" aria-label="Live n Loud Edition photo carousel">
       <div className="coverflow-topline">
         <span>FRAME {String(active + 1).padStart(2, "0")}</span>
         <span>{String(active + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}</span>
       </div>
 
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- custom carousel widget follows the ARIA carousel pattern (focusable region + arrow-key navigation) */}
-      <div className="coverflow-stage" tabIndex={0} {...stageHandlers}>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex, jsx-a11y/no-static-element-interactions -- carousel stage supports arrows and Enter/Space; the active image also has a native button */}
+      <div ref={stageRef} className="coverflow-stage" tabIndex={0} {...stageHandlers} onKeyDown={(event) => {
+        if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          setLightboxOpen(true);
+        } else stageHandlers.onKeyDown(event);
+      }}>
         {photos.map((photo, index) => {
           const style = cardStyle(index);
           if (!style) return null;
@@ -110,7 +128,7 @@ export default function CoverflowGallery({ photos }: { photos: CoverflowPhoto[] 
               className={`coverflow-card${offset === 0 ? " is-active" : ""}`}
               style={style}
               onClick={() => (offset === 0 ? setLightboxOpen(true) : goTo(index))}
-              tabIndex={-1}
+              tabIndex={offset === 0 ? 0 : -1}
               aria-hidden={offset !== 0}
               aria-current={offset === 0}
             >
@@ -148,13 +166,13 @@ export default function CoverflowGallery({ photos }: { photos: CoverflowPhoto[] 
       </div>
 
       {lightboxOpen && (
-        <div className="lightbox" role="dialog" aria-modal="true" aria-label={`${current.label} photo viewer`}>
+        <dialog ref={dialogRef} className="lightbox" aria-modal="true" aria-label={`${current.label} photo viewer`} onCancel={(event) => { event.preventDefault(); setLightboxOpen(false); }}>
           <button type="button" className="lightbox-close" onClick={() => setLightboxOpen(false)} aria-label="Close photo viewer">✕</button>
           <button type="button" className="lightbox-nav lightbox-prev" onClick={prev} aria-label="Previous photo">←</button>
 
           <div
             className="lightbox-frame"
-            onWheel={onWheelZoom}
+            ref={frameRef}
             onPointerDown={onPanPointerDown}
             onPointerMove={onPanPointerMove}
             onPointerUp={endPan}
@@ -181,7 +199,7 @@ export default function CoverflowGallery({ photos }: { photos: CoverflowPhoto[] 
             <span>{current.label} · {current.location}</span>
             <span>{String(active + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")} · {zoom > MIN_ZOOM ? "click to reset" : "click or scroll to zoom"}</span>
           </div>
-        </div>
+        </dialog>
       )}
     </div>
   );

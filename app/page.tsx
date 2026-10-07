@@ -8,9 +8,12 @@ import MarqueeTicker from "./components/marquee-ticker";
 import MobileNav from "./components/mobile-nav";
 import EventStoryRow from "./components/event-story-row";
 import CatalogueCoverflow from "./components/catalogue-coverflow";
+import { approvedPolicyUrl, contactEmail, siteUrl, socialLinks } from "./site-config";
+import { newsletterReady } from "./lib/newsletter-config";
 
 const appleArtist = "https://music.apple.com/us/artist/beanie-soulja/1547405349";
 const spotifyArtist = "https://open.spotify.com/artist/5kHeG9h2dDcpwthkGOBQ5D?si=_81GgrGIRrawneV3YdnKyw";
+export const dynamic = "force-dynamic";
 
 const focusAreas = [
   ["01", "Music", "Release strategy, artist storytelling and songs built to travel."],
@@ -84,15 +87,24 @@ const catalogue = [
   },
 ];
 
-const stories = [
-  ["Sound", "From Fela and reggae records to a borderless Afrobeats voice"],
-  ["Movement", "The dancers, DJs and live rooms carrying the culture forward"],
-  ["City", "Lagos energy, independent ambition and music made to travel"],
-];
-
 export default function Home() {
+  const contacts = [
+    { kind: "artists" as const, label: "Artists", action: "Submit your music" },
+    { kind: "bookings" as const, label: "Bookings", action: "Book Beanie Soulja" },
+    { kind: "culture" as const, label: "Culture", action: "Pitch a collaboration" },
+  ];
+  const privacy = approvedPolicyUrl("privacy");
+  const terms = approvedPolicyUrl("terms");
+  const canonical = siteUrl();
   return (
-    <main>
+    <main id="main-content">
+      <a className="skip-link" href="#top">Skip to content</a>
+      {canonical && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org", "@graph": [
+          { "@type": "Organization", name: "Swerve Music", url: canonical.href, logo: new URL("/favicon-192.png", canonical).href },
+          { "@type": "Person", name: "Beanie Soulja", jobTitle: "Musician", sameAs: [appleArtist, spotifyArtist] },
+        ],
+      }).replace(/</g, "\\u003c") }} />}
       <ScrollReveal />
       <HeaderScrollWatcher />
 
@@ -168,7 +180,7 @@ export default function Home() {
             <p>Beanie Soulja grew up around the music of Fela Kuti, Bob Marley and Lucky Dube before developing his voice in church choir. His catalogue carries that foundation into a contemporary Afrobeats sound made for real stories, live rooms and listeners across borders.</p>
             <dl>
               <div><dt>Lead release</dt><dd>TKL</dd></div>
-              <div><dt>Catalogue</dt><dd>7 supplied masters</dd></div>
+              <div><dt>Catalogue</dt><dd>7 tracks</dd></div>
               <div><dt>Available for</dt><dd>Shows · press · partnerships</dd></div>
             </dl>
           </div>
@@ -209,7 +221,7 @@ export default function Home() {
             <p className="eyebrow">Listen now</p>
             <h2 id="catalogue-title">Beanie Soulja<br /><em>catalogue.</em></h2>
           </div>
-          <p className="section-intro">Seven supplied masters, presented as 30-second website previews with links to the artist&apos;s official streaming profiles.</p>
+          <p className="section-intro">Listen to seven 30-second previews. Find more on Beanie Soulja&apos;s official streaming profiles.</p>
         </div>
         <div data-reveal>
           <CatalogueCoverflow tracks={catalogue} spotifyArtist={spotifyArtist} />
@@ -226,14 +238,6 @@ export default function Home() {
         </div>
         <div className="story-list">
           <EventStoryRow />
-          {stories.map(([tag, title], index) => (
-            <article key={title} data-reveal style={{ transitionDelay: `${(index + 1) * 90}ms` }}>
-              <span className="story-marker" aria-hidden="true">◆</span>
-              <span className="story-tag">{tag}</span>
-              <h3>{title}</h3>
-              <span className="story-arrow">↗</span>
-            </article>
-          ))}
         </div>
       </section>
 
@@ -260,7 +264,7 @@ export default function Home() {
         </div>
         <div className="newsletter-panel" data-reveal>
           <span className="newsletter-number">01 / NEWSLETTER</span>
-          <NewsletterSignup />
+          <NewsletterSignup available={newsletterReady()} privacyUrl={privacy} />
           <p className="newsletter-note">No noise. Just releases, stories, opportunities and live moments worth knowing.</p>
         </div>
       </section>
@@ -269,16 +273,18 @@ export default function Home() {
         <p className="eyebrow" data-reveal>Join the movement</p>
         <h2 data-reveal>Have music, a stage<br />or a story to share?</h2>
         <div className="contact-links" data-reveal>
-          <a href="mailto:artists@swervemusic.com"><span>Artists</span> Submit your music <i>↗</i></a>
-          <a href="mailto:bookings@swervemusic.com"><span>Bookings</span> Book Beanie Soulja <i>↗</i></a>
-          <a href="mailto:culture@swervemusic.com"><span>Culture</span> Pitch a collaboration <i>↗</i></a>
+          {contacts.map(({ kind, label, action }) => {
+            const email = contactEmail(kind);
+            return email ? <a href={`mailto:${email}`} key={kind}><span>{label}</span> {action} <i>↗</i></a> :
+              <div className="contact-unavailable" key={kind}><span>{label}</span><strong>{action}</strong><small>Email enquiries are temporarily unavailable.</small></div>;
+          })}
         </div>
       </section>
 
       <footer>
         <img src="/swerve-music-lockup-pale.png" alt="Swerve Music" />
         <p>Afrobeats-rooted. Independent-artist focused. Open to the world.</p>
-        <div><a href={appleArtist} target="_blank" rel="noreferrer">Apple Music</a><a href={spotifyArtist} target="_blank" rel="noreferrer">Spotify</a><span>Instagram</span><span>TikTok</span><span>YouTube</span><span>© 2026 Swerve Music</span></div>
+        <div><a href={appleArtist} target="_blank" rel="noreferrer">Apple Music</a><a href={spotifyArtist} target="_blank" rel="noreferrer">Spotify</a>{socialLinks().map(({ label, href }) => <a href={href} key={label} target="_blank" rel="noreferrer">{label}</a>)}{privacy && <a href={privacy}>Privacy</a>}{terms && <a href={terms}>Terms</a>}<span>© {new Date().getFullYear()} Swerve Music</span></div>
       </footer>
     </main>
   );

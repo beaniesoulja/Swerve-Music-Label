@@ -17,8 +17,8 @@ export function useCoverflow(count: number) {
   });
 
   const goTo = useCallback((index: number) => setActive(((index % count) + count) % count), [count]);
-  const next = useCallback(() => goTo(active + 1), [active, goTo]);
-  const prev = useCallback(() => goTo(active - 1), [active, goTo]);
+  const next = useCallback(() => setActive((current) => (current + 1) % count), [count]);
+  const prev = useCallback(() => setActive((current) => (current - 1 + count) % count), [count]);
 
   // Pointer tracking starts on pointerdown, but no React state changes until real
   // movement is detected — otherwise every plain click/tap forces a re-render
