@@ -11,6 +11,9 @@ const eslintConfig = defineConfig([
   globalIgnores([
     ".next/**",
     "dist/**",
+    ".output/**",
+    ".vercel/**",
+    "examples/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
@@ -22,6 +25,14 @@ const eslintConfig = defineConfig([
   reactHooks.configs.flat["recommended-latest"],
   jsxA11y.flatConfigs.recommended,
   next.configs["core-web-vitals"],
+  {
+    rules: {
+      // Static artwork is served on both hosts; below-the-fold images use lazy loading.
+      "@next/next/no-img-element": "off",
+      // App Router root layout, not the obsolete Pages Router _document convention.
+      "@next/next/no-page-custom-font": "off",
+    },
+  },
   {
     languageOptions: {
       globals: {

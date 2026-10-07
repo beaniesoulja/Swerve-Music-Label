@@ -6,7 +6,7 @@ export function getDb() {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL is not set. Add it in your Vercel project's environment variables (Neon connection string)."
+      "DATABASE_URL is not set. Configure the Neon Postgres connection in the server environment."
     );
   }
 

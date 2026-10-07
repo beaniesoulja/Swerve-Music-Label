@@ -19,10 +19,11 @@ export type CatalogueTrack = {
 export default function CatalogueCoverflow({ tracks, spotifyArtist }: { tracks: CatalogueTrack[]; spotifyArtist: string }) {
   const { active, goTo, next, prev, stageHandlers, cardStyle } = useCoverflow(tracks.length);
   const [volume, setVolume] = useState(DEFAULT_CATALOGUE_VOLUME);
+  const [muted, setMuted] = useState(false);
   const current = tracks[active];
 
   return (
-    <div className="coverflow catalogue-coverflow" aria-roledescription="carousel" aria-label="Beanie Soulja catalogue carousel">
+    <div className="coverflow catalogue-coverflow" role="region" aria-roledescription="carousel" aria-label="Beanie Soulja catalogue carousel">
       <div className="coverflow-topline">
         <span>TRACK {String(active + 1).padStart(2, "0")}</span>
         <span>{String(active + 1).padStart(2, "0")} / {String(tracks.length).padStart(2, "0")}</span>
@@ -64,6 +65,8 @@ export default function CatalogueCoverflow({ tracks, spotifyArtist }: { tracks: 
           showVolume
           volume={volume}
           onVolumeChange={setVolume}
+          muted={muted}
+          onMutedChange={setMuted}
         />
         <div className="track-links">
           <a href={current.apple} target="_blank" rel="noreferrer">Apple Music ↗</a>
@@ -80,6 +83,7 @@ export default function CatalogueCoverflow({ tracks, spotifyArtist }: { tracks: 
               key={track.title}
               className={index === active ? "is-active" : ""}
               aria-label={`Go to ${track.title}`}
+              aria-current={index === active ? "true" : undefined}
               onClick={() => goTo(index)}
             />
           ))}

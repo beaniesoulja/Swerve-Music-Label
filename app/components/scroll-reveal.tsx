@@ -24,8 +24,15 @@ export default function ScrollReveal() {
       { threshold: 0, rootMargin: "0px 0px -5% 0px" },
     );
 
-    targets.forEach((target) => observer.observe(target));
-    return () => observer.disconnect();
+    targets.forEach((target) => {
+      // Only opt off-screen content into the effect after JavaScript is running.
+      if (target.getBoundingClientRect().top > window.innerHeight) target.classList.add("reveal-ready");
+      observer.observe(target);
+    });
+    return () => {
+      observer.disconnect();
+      targets.forEach((target) => target.classList.remove("reveal-ready"));
+    };
   }, []);
 
   return null;

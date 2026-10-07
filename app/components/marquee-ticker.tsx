@@ -1,4 +1,4 @@
-const ITEMS = ["Afrobeats", "Independent Label", "Lagos to the World", "New Music Weekly", "Artist-First", "Culture in Motion"];
+const ITEMS = ["Afrobeats", "Independent Label", "Lagos to the World", "Music", "Artist-First", "Culture in Motion"];
 
 export default function MarqueeTicker() {
   const track = (

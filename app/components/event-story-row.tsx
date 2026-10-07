@@ -5,14 +5,13 @@ import CoverflowGallery from "./coverflow-gallery";
 
 const PHOTO_COUNT = 186;
 const LOCATION = "OhOhBeeHive · Akure, Ondo State";
-const LABELS = ["On the Red Carpet", "Center Stage", "Crowd Energy", "In the Mix", "Live n Loud", "The Performance", "Backstage Moments"];
 
 const photos = Array.from({ length: PHOTO_COUNT }, (_, i) => {
   const n = String(i + 1).padStart(2, "0");
   return {
     src: `/culture/live-n-loud/${n}.jpg`,
     alt: `Live n Loud Edition of Sterling Chilling, photo ${i + 1}`,
-    label: LABELS[i % LABELS.length],
+    label: `Live n Loud · Photo ${i + 1}`,
     location: LOCATION,
   };
 });
@@ -49,6 +48,7 @@ export default function EventStoryRow() {
         className={`event-story-panel${open ? " is-open" : ""}`}
         style={{ maxHeight: panelHeight }}
         aria-hidden={!open}
+        inert={!open}
         ref={panelRef}
       >
         <div className="magazine">
