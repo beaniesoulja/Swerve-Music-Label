@@ -3,7 +3,7 @@
 ## Build targets
 
 - Vercel: `vercel.json` sets `VINEXT_TARGET=vercel vite build`; the host's Vercel environment selects the Nitro deployment preset. Verify an actual preview deployment before production.
-- Cloudflare: `npm run build` produces `dist/server/index.js` and `dist/client/`. Configure runtime Neon and mail-provider secrets. `.openai/hosting.json` no longer requests D1; PostgreSQL migrations must not be applied to D1.
+- Cloudflare: `npm run build` produces `dist/server/index.js` and `dist/client/`. Configure runtime Neon and mail-provider secrets. There is no newsletter D1 binding; PostgreSQL migrations must not be applied to D1.
 - Local Node smoke test: `VINEXT_TARGET=vercel npm run build`, then `PORT=4174 HOST=localhost node .output/server/index.mjs`.
 
 Use Node.js 22.13+ and `npm ci`. Build on the deployment platform so native dependencies match its OS/architecture. No deployment has been performed as part of these fixes.
@@ -36,3 +36,8 @@ Subscriber exports contain personal data and per-person unsubscribe links. Keep 
 ## Policies and live checks
 
 Policy text needs the owner's business identity, contact details, retention/deletion process, and chosen providers. Do not publish invented legal text. Configure the public links after approval. Also verify the production domain, HTTPS, host-added badges, response/security headers, real devices, and backup/restore access before declaring the site launch-ready.
+
+## Important
+
+- The full website is not intentionally deployed by this package; deployment happens only when a hosting provider runs it.
+- The included song files are 30-second promotional previews. Full masters are excluded from this hosting ZIP.
