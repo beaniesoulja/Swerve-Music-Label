@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import { useEffect, useId, useImperativeHandle, useRef, useState } from "react";
+import type { CSSProperties, Ref } from "react";
+
+export type MusicPlayerHandle = { play: () => Promise<void> };
 
 type IosMusicPlayerProps = {
+  ref?: Ref<MusicPlayerHandle>;
   src: string;
   title: string;
   artist: string;
@@ -64,6 +67,7 @@ function SpeakerIcon({ muted }: { muted: boolean }) {
 }
 
 export default function IosMusicPlayer({
+  ref,
   src,
   title,
   artist,
@@ -108,7 +112,7 @@ export default function IosMusicPlayer({
     return () => window.removeEventListener("swerve-audio-play", pauseForAnotherPlayer);
   }, [playerId]);
 
-  const togglePlayback = async () => {
+  const play = async () => {
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
@@ -118,15 +122,22 @@ export default function IosMusicPlayer({
       try {
         if (audio.error) audio.load();
         await audio.play();
-      } catch {
+      } catch (cause) {
+        if (!audio.isConnected || (cause instanceof DOMException && cause.name === "AbortError")) return;
         setPlaying(false);
         setError("This preview could not play. Check your connection and try again.");
       } finally {
-        setLoading(false);
+        if (audio.isConnected) setLoading(false);
       }
-    } else {
-      audio.pause();
     }
+  };
+
+  useImperativeHandle(ref, () => ({ play }));
+
+  const togglePlayback = () => {
+    const audio = audioRef.current;
+    if (audio && !audio.paused) audio.pause();
+    else void play();
   };
 
   const seek = (value: number) => {

@@ -1,94 +1,64 @@
 "use client";
 
-import { useState } from "react";
-import IosMusicPlayer from "./ios-music-player";
-import { useCoverflow } from "./use-coverflow";
-
-const DEFAULT_CATALOGUE_VOLUME = 0.3;
+import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import IosMusicPlayer, { type MusicPlayerHandle } from "./ios-music-player";
 
 export type CatalogueTrack = {
   title: string;
   credit: string;
   year: string;
-  duration: string;
   cover: string;
   audio: string;
   apple: string;
+  spotify: string;
 };
 
-export default function CatalogueCoverflow({ tracks, spotifyArtist }: { tracks: CatalogueTrack[]; spotifyArtist: string }) {
-  const { active, goTo, next, prev, stageHandlers, cardStyle } = useCoverflow(tracks.length);
-  const [volume, setVolume] = useState(DEFAULT_CATALOGUE_VOLUME);
+export default function CatalogueCoverflow({ tracks }: { tracks: CatalogueTrack[] }) {
+  const playerRef = useRef<MusicPlayerHandle>(null);
+  const [active, setActive] = useState(0);
+  const [volume, setVolume] = useState(0.3);
   const [muted, setMuted] = useState(false);
   const current = tracks[active];
+  const selectTrack = (index: number) => {
+    // Commit the selected audio before play(), keeping playback in the user gesture.
+    flushSync(() => setActive(index));
+    void playerRef.current?.play();
+  };
+  const move = (direction: number) => selectTrack((active + direction + tracks.length) % tracks.length);
 
   return (
-    <div className="coverflow catalogue-coverflow" role="region" aria-roledescription="carousel" aria-label="Beanie Soulja catalogue carousel">
-      <div className="coverflow-topline">
-        <span>TRACK {String(active + 1).padStart(2, "0")}</span>
-        <span>{String(active + 1).padStart(2, "0")} / {String(tracks.length).padStart(2, "0")}</span>
-      </div>
-
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- custom carousel widget follows the ARIA carousel pattern (focusable region + arrow-key navigation) */}
-      <div className="coverflow-stage catalogue-stage" tabIndex={0} {...stageHandlers}>
-        {tracks.map((track, index) => {
-          const style = cardStyle(index, { spacing: 118 });
-          if (!style) return null;
-          const offset = index - active;
-          return (
-            <button
-              type="button"
-              key={track.title}
-              className={`coverflow-card catalogue-card${offset === 0 ? " is-active" : ""}`}
-              style={style}
-              onClick={() => (offset === 0 ? undefined : goTo(index))}
-              tabIndex={-1}
-              aria-hidden={offset !== 0}
-              aria-current={offset === 0}
-            >
-              <img src={track.cover} alt={`${track.title} cover artwork`} loading="lazy" draggable={false} />
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="catalogue-detail">
-        <span className="catalogue-detail-meta">{current.year} · {current.duration}</span>
-        <h3>{current.title}</h3>
-        <p>{current.credit}</p>
-        <IosMusicPlayer
-          key={current.title}
-          src={current.audio}
-          title={current.title}
-          artist={current.credit}
-          cover={current.cover}
-          showVolume
-          volume={volume}
-          onVolumeChange={setVolume}
-          muted={muted}
-          onMutedChange={setMuted}
-        />
-        <div className="track-links">
-          <a href={current.apple} target="_blank" rel="noreferrer">Apple Music ↗</a>
-          <a href={spotifyArtist} target="_blank" rel="noreferrer">Spotify ↗</a>
+    <div className="release-browser" role="region" aria-label="Selected music previews">
+      <div className="release-preview" id="selected-release">
+        <img className="selected-cover" src={current.cover} alt={`${current.title} cover artwork`} width={600} height={600} loading="lazy" />
+        <div className="selected-release-heading" aria-live="polite">
+          <span className="eyebrow">{current.year} · 30-second preview</span>
+          <h3>{current.title}</h3><p>{current.credit}</p>
         </div>
+        <IosMusicPlayer ref={playerRef} key={current.title} src={current.audio} title={current.title} artist={current.credit}
+          cover={current.cover} showVolume volume={volume} onVolumeChange={setVolume} muted={muted} onMutedChange={setMuted} />
       </div>
-
-      <div className="coverflow-controls">
-        <button type="button" onClick={prev} aria-label="Previous track">←</button>
-        <div className="coverflow-dots">
+      <div className="release-selection">
+        <div className="release-list-heading"><span>{tracks.length} selected tracks</span><span>Listen & save</span></div>
+        <ol className="release-list" aria-label="Choose a track">
           {tracks.map((track, index) => (
-            <button
-              type="button"
-              key={track.title}
-              className={index === active ? "is-active" : ""}
-              aria-label={`Go to ${track.title}`}
-              aria-current={index === active ? "true" : undefined}
-              onClick={() => goTo(index)}
-            />
+            <li key={track.title} className={active === index ? "is-selected" : undefined}>
+              <button type="button" onClick={() => selectTrack(index)} aria-pressed={active === index} aria-controls="selected-release" aria-label={`Select ${track.title}`}>
+                <span className="release-number">{String(index + 1).padStart(2, "0")}</span>
+                <span className="release-list-title"><strong>{track.title}</strong><span>{track.credit} · {track.year}</span></span>
+              </button>
+              <div className="track-platforms" role="group" aria-label={`Listen and save ${track.title}`}>
+                <a href={track.apple} target="_blank" rel="noopener noreferrer" title="Open in Apple Music to save" aria-label={`Open ${track.title} in Apple Music to save (opens in a new tab)`}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20 2 8 4.5v12.1a4.3 4.3 0 0 0-2-.1c-1.9.4-3.2 1.9-2.9 3.4.3 1.5 2.1 2.3 4 1.9 1.8-.4 3-1.7 2.9-3.1V9l8-1.7v7.3a4.3 4.3 0 0 0-2-.1c-1.9.4-3.2 1.9-2.9 3.4.3 1.5 2.1 2.3 4 1.9 1.8-.4 3-1.7 2.9-3.1V2Z" /></svg>
+                </a>
+                <a href={track.spotify} target="_blank" rel="noopener noreferrer" title="Open in Spotify to save" aria-label={`Open ${track.title} in Spotify to save (opens in a new tab)`}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor" /><path d="M6.7 9c3.4-1 7.4-.7 10.5 1M7.3 12.1c2.9-.8 6.3-.5 9 1M8 15c2.4-.6 5-.4 7.3.8" fill="none" stroke="var(--cream)" strokeWidth="1.6" strokeLinecap="round" /></svg>
+                </a>
+              </div>
+            </li>
           ))}
-        </div>
-        <button type="button" onClick={next} aria-label="Next track">→</button>
+        </ol>
+        <div className="release-navigation"><button type="button" onClick={() => move(-1)} aria-label="Previous track">← Previous</button><button type="button" onClick={() => move(1)} aria-label="Next track">Next →</button></div>
       </div>
     </div>
   );

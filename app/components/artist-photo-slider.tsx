@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 const slides = [
   { src: "/artist/beanie-soulja/primary-studio.jpg", width: 1400, height: 1400, alt: "Beanie Soulja in a dark studio portrait", label: "Official portrait", note: "Press / artist profile" },
   { src: "/artist/beanie-soulja/studio-full-body.jpg", width: 1120, height: 1400, alt: "Beanie Soulja in a dark full-body studio portrait", label: "Studio series", note: "Campaign / booking" },
-  { src: "/artist/beanie-soulja/interview-microphone.jpg", width: 787, height: 1400, alt: "Beanie Soulja speaking into a microphone", label: "In conversation", note: "Interview / live" },
   { src: "/artist/beanie-soulja/culture-event.jpg", width: 1400, height: 933, alt: "Beanie Soulja at a cultural event", label: "In the room", note: "Culture / community" },
   { src: "/artist/beanie-soulja/travel-pyramid.jpg", width: 1397, height: 1400, alt: "Beanie Soulja visiting the pyramids in Egypt", label: "Across borders", note: "World culture" },
 ];

@@ -20,12 +20,22 @@ test("production homepage renders real content and safe unavailable service stat
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /<title>Swerve Music/);
-  assert.match(html, /We move/);
+  assert.match(html, /Selected releases\./);
   assert.match(html, /Beanie/);
   assert.match(html, /Newsletter signups are temporarily unavailable/);
   assert.match(html, /Email enquiries are temporarily unavailable/);
   assert.doesNotMatch(html, /href="mailto:/);
   assert.doesNotMatch(html, /supplied masters|New Music Weekly|Your site is taking shape/);
+  assert.match(html, /Beanie Soulja feat\. Easyscope/);
+  assert.match(html, /DREAMSVIEWNG feat\. Dapson Ahmir/);
+  const trackList = html.match(/<ol class="release-list"[\s\S]*?<\/ol>/)?.[0] || "";
+  assert.equal((trackList.match(/https:\/\/open\.spotify\.com\/track\//g) || []).length, 7);
+  assert.equal((trackList.match(/https:\/\/music\.apple\.com\/us\/album\/[^" ]+\?i=/g) || []).length, 7);
+  assert.equal((trackList.match(/<svg /g) || []).length, 14);
+  assert.doesNotMatch(html, /<audio[^>]*autoplay/i);
+  assert.doesNotMatch(html, /interview-microphone|In conversation|speaking into a microphone/);
+  assert.equal((html.match(/aria-label="Show (?:Official portrait|Studio series|In the room|Across borders) image"/g) || []).length, 4);
+  assert.doesNotMatch(html, /₦5 million|church choir|LATEST<br\/>RELEASE/);
   for (const id of ["top", "artists", "music", "culture", "live", "newsletter", "contact"]) assert.ok(html.includes(`id="${id}"`));
   for (const file of ["tkl-preview.mp3", "the-motto-preview.mp3", "capsize-preview.mp3", "burst-down-preview-v3.mp3", "fowosere-preview.mp3", "psycho-preview.mp3", "nsg-preview.mp3"]) await access(new URL(`../public/audio/${file}`, import.meta.url));
 });
@@ -35,6 +45,18 @@ test("newsletter API distinguishes malformed input and unavailable service", asy
     const response = await request("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body });
     assert.equal(response.status, expected);
   }
+});
+
+test("verified shared enquiry inbox renders in every contact category", async () => {
+  const configured = await startWorker({ CONTACT_EMAIL_ENABLED: "" });
+  try {
+    const html = await (await configured.fetch("/")).text();
+    assert.equal((html.match(/href="mailto:hello@swervemusic\.org"/g) || []).length, 5);
+    assert.match(html, /href="mailto:hello@swervemusic\.org">Contact us<\/a>/);
+    assert.doesNotMatch(html, />hello@swervemusic\.org<\/a>/);
+    assert.doesNotMatch(html, /Email enquiries are temporarily unavailable|Booking enquiries are temporarily unavailable/);
+    assert.match(html, /Newsletter signups are temporarily unavailable/);
+  } finally { await configured.stop(); }
 });
 
 test("discovery routes exist and unconfigured previews are not indexable", async () => {
@@ -54,6 +76,9 @@ test("confirmation links require an explicit POST and missing pages return 404",
   assert.match(html, /Confirm subscription/);
   assert.match(html, /noindex/);
   assert.equal((await request("/qa-nonexistent-page")).status, 404);
+  for (const suffix of [".jpg", "-480.webp", "-900.webp", "-1200.webp"]) {
+    assert.equal((await request(`/artist/beanie-soulja/interview-microphone${suffix}`)).status, 404);
+  }
 });
 
 test("all public assets are served and retired preview URLs redirect to the current audio", async () => {
