@@ -37,9 +37,9 @@ export default function EventStoryRow() {
   return (
     <article className="story-list-item event-story" data-reveal>
       <button type="button" className="event-story-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-controls="event-story-panel">
-        <span className="story-marker" aria-hidden="true">◆</span>
-        <span className="story-tag">Sponsorship</span>
-        <h3>Inside Sterling Chilling: Live n Loud in Akure.</h3>
+        <span className="story-marker" aria-hidden="true">01</span>
+        <span className="story-tag">Photo archive</span>
+        <h3>Sterling Chilling · Live n Loud</h3>
         <span className={`event-story-arrow${open ? " is-open" : ""}`}>+</span>
       </button>
 
@@ -52,39 +52,14 @@ export default function EventStoryRow() {
         ref={panelRef}
       >
         <div className="magazine">
-          <p className="magazine-kicker">Event Report · Swerve Music Presents</p>
+          <p className="magazine-kicker">Live n Loud · Photo archive</p>
           <p className="magazine-byline">Akure, Ondo State · OhOhBeeHive</p>
-
-          <p className="magazine-lead">
-            <span className="magazine-highlight">OOB Records &amp; Swerve Music</span> brought electrifying entertainment to Akure, Ondo State, with the premiere of the
-            Live n Loud Edition of Sterling Chilling at OhOhBeeHive. The event gathered music fans and entertainment
-            lovers for a night of fine taste, distinguished company, and unforgettable energy.
-          </p>
-
-          <p>
-            The stage came alive with performances from <strong className="magazine-artist">Easyscope</strong>,{" "}
-            <strong className="magazine-artist">Kabex</strong>, <strong className="magazine-artist">Hvnter</strong>,{" "}
-            <strong className="magazine-artist">Oria</strong>, <strong className="magazine-artist">BEEJAY</strong>, and{" "}
-            <strong className="magazine-artist">AY Smush</strong>. Each artist brought their own flavour to the night,
-            keeping the crowd engaged and the atmosphere buzzing.
-          </p>
-
-          <blockquote className="magazine-pullquote">
-            &ldquo;From the performances to the audience&apos;s infectious enthusiasm, the energy was unmatched.&rdquo;
-          </blockquote>
 
           <div className="magazine-gallery">
             <CoverflowGallery photos={photos} />
           </div>
 
-          <p>
-            Gaming also took the spotlight as Kabex and Dante faced off in an exciting FC26 showdown. Kabex emerged
-            victorious, claiming the ₦5 million prize and adding another memorable moment to the celebration. With
-            music, gaming, and great company sharing the spotlight, Sterling Chilling&apos;s Live n Loud Edition
-            delivered a night to remember.
-          </p>
-
-          <p className="magazine-credit">Photography: Swerve Music &amp; OhOhBeeHive · {photos.length} frames from the night</p>
+          <p className="magazine-credit">{photos.length} photographs in this archive</p>
         </div>
       </div>
     </article>

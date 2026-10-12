@@ -13,14 +13,17 @@ export function approvedPolicyUrl(kind: "privacy" | "terms"): string | undefined
   } catch { return undefined; }
 }
 export function contactEmail(kind: "artists" | "bookings" | "culture"): string | undefined {
-  if (process.env.CONTACT_EMAIL_ENABLED !== "true") return undefined;
-  const value = process.env[`CONTACT_${kind.toUpperCase()}_EMAIL`];
+  // Owner confirmed forwarding and receipt for this public inbox on 12 October 2026.
+  // Keep an explicit off switch and optional per-category overrides.
+  if ((process.env.CONTACT_EMAIL_ENABLED || "true") !== "true") return undefined;
+  const value = process.env[`CONTACT_${kind.toUpperCase()}_EMAIL`] || "hello@swervemusic.org";
   return value && /^[^\s@?&#]+@[^\s@?&#]+\.[^\s@?&#]+$/.test(value) ? value : undefined;
 }
 export function socialLinks() {
   return ["Instagram", "TikTok", "YouTube"].flatMap((label) => {
     try {
-      const url = new URL(process.env[`SOCIAL_${label.toUpperCase()}_URL`] || "");
+      const defaultUrl = label === "Instagram" ? "https://www.instagram.com/swervemusicltd/" : "";
+      const url = new URL(process.env[`SOCIAL_${label.toUpperCase()}_URL`] || defaultUrl);
       return url.protocol === "https:" ? [{ label, href: url.href }] : [];
     } catch { return []; }
   });

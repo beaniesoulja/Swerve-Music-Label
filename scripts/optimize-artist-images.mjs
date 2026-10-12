@@ -2,7 +2,7 @@ import sharp from "sharp";
 import { fileURLToPath } from "node:url";
 
 // Reproducible delivery variants. Preserve the supplied originals untouched.
-const names = ["primary-studio", "studio-full-body", "interview-microphone", "culture-event", "travel-pyramid"];
+const names = ["primary-studio", "studio-full-body", "culture-event", "travel-pyramid"];
 for (const name of names) {
   const input = fileURLToPath(new URL(`../public/artist/beanie-soulja/${name}.jpg`, import.meta.url));
   for (const width of [480, 900, 1200]) {
