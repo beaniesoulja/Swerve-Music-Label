@@ -15,10 +15,14 @@ const worker = await startWorker();
 after(() => worker.stop());
 const request = (path, options) => worker.fetch(path, options);
 
+// Plain copyright text is retained; decorative emoji-capable glyphs are not.
+const assertNoEmoji = (html) => assert.doesNotMatch(html.replaceAll("©", ""), /[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u20E3]/u);
+
 test("production homepage renders real content and safe unavailable service states", async () => {
   const response = await request("/");
   assert.equal(response.status, 200);
   const html = await response.text();
+  assertNoEmoji(html);
   assert.match(html, /<title>Swerve Music/);
   assert.match(html, /Selected releases\./);
   assert.match(html, /Beanie/);
@@ -51,6 +55,7 @@ test("verified shared enquiry inbox renders in every contact category", async ()
   const configured = await startWorker({ CONTACT_EMAIL_ENABLED: "" });
   try {
     const html = await (await configured.fetch("/")).text();
+    assertNoEmoji(html);
     assert.equal((html.match(/href="mailto:hello@swervemusic\.org"/g) || []).length, 5);
     assert.match(html, /href="mailto:hello@swervemusic\.org">Contact us<\/a>/);
     assert.doesNotMatch(html, />hello@swervemusic\.org<\/a>/);
@@ -111,6 +116,7 @@ test("configured public settings render canonical metadata, policy links, and th
   try {
     const html = await (await configured.fetch("/")).text();
     const canonical = html.match(/<link\b[^>]*rel="canonical"[^>]*>/)?.[0] || "missing canonical link";
+    assertNoEmoji(html);
     assert.match(canonical, /href="https:\/\/example.test\/?"/);
     assert.match(html, /name="email"/);
     assert.match(html, /Read our privacy policy/);

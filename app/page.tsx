@@ -35,7 +35,7 @@ export default function Home() {
         <nav className="desktop-nav" aria-label="Main navigation">
           <a href="#music">Music</a><a href="#artists">Artist</a><a href="#culture">Culture</a><a href="#live">Live</a>
         </nav>
-        <a className="header-cta" href="#contact">Contact <span aria-hidden="true">↗</span></a>
+        <a className="header-cta" href="#contact">Contact</a>
         <MobileNav />
       </header>
 
@@ -44,11 +44,11 @@ export default function Home() {
           <p className="eyebrow">Swerve Music · Independent artist label</p>
           <h1>Art.<br />Music.<br /><em>Culture.</em></h1>
           <p className="hero-deck">Swerve Music promotes art, music and culture. Rooted in Afrobeats, built with independent artists and open to the world.</p>
-          <div className="hero-actions"><a className="button button-dark" href="#music">Hear Beanie Soulja <span aria-hidden="true">↗</span></a><a className="text-link" href="#artists">Meet the artist</a></div>
+          <div className="hero-actions"><a className="button button-dark" href="#music">Hear Beanie Soulja</a><a className="text-link" href="#artists">Meet the artist</a></div>
         </div>
         <a className="hero-feature" href="#music" aria-label="Explore TKL and selected releases">
           <img src="/covers/tkl.jpg" alt="TKL cover artwork" width={600} height={600} fetchPriority="high" />
-          <span className="hero-feature-caption"><span><small>Featured release · 2026</small><strong>TKL</strong><span>Beanie Soulja feat. Easyscope</span></span><span aria-hidden="true">↗</span></span>
+          <span className="hero-feature-caption"><span><small>Featured release · 2026</small><strong>TKL</strong><span>Beanie Soulja feat. Easyscope</span></span></span>
         </a>
       </section>
 
@@ -61,7 +61,7 @@ export default function Home() {
       </section>
 
       <section className="section artists-section" id="artists">
-        <div className="section-heading"><div><p className="eyebrow">02 / The artist</p><h2>Beanie Soulja.</h2></div><a className="text-link" href={appleArtist} target="_blank" rel="noreferrer">Artist profile ↗</a></div>
+        <div className="section-heading"><div><p className="eyebrow">02 / The artist</p><h2>Beanie Soulja.</h2></div><a className="text-link" href={appleArtist} target="_blank" rel="noreferrer">Artist profile</a></div>
         <div className="artist-feature">
           <ArtistPhotoSlider />
           <div className="artist-bio">
@@ -73,7 +73,7 @@ export default function Home() {
               <div><dt>On this site</dt><dd>7 selected previews</dd></div>
               <div><dt>Explore</dt><dd>Music · artist photography · live archive</dd></div>
             </dl>
-            <div className="artist-platforms" aria-label="Beanie Soulja streaming profiles"><a className="text-link" href={appleArtist} target="_blank" rel="noreferrer">Apple Music ↗</a><a className="text-link" href={spotifyArtist} target="_blank" rel="noreferrer">Spotify ↗</a></div>
+            <div className="artist-platforms" aria-label="Beanie Soulja streaming profiles"><a className="text-link" href={appleArtist} target="_blank" rel="noreferrer">Apple Music</a><a className="text-link" href={spotifyArtist} target="_blank" rel="noreferrer">Spotify</a></div>
           </div>
         </div>
       </section>
@@ -85,7 +85,7 @@ export default function Home() {
 
       <section className="live-section" id="live">
         <div className="live-copy"><p className="eyebrow">04 / Swerve live</p><h2>Put the music<br />in the room.</h2><p>For promoters, festivals, venues, cultural partners and curated independent-artist showcases.</p></div>
-        <div className="live-enquiry"><h3>Beanie Soulja</h3><p>{bookingsAvailable ? "Shows · press · partnerships" : "Booking enquiries are temporarily unavailable."}</p><a className="text-link" href="#contact">{bookingsAvailable ? "Booking enquiry" : "Contact information"} <span aria-hidden="true">↗</span></a></div>
+        <div className="live-enquiry"><h3>Beanie Soulja</h3><p>{bookingsAvailable ? "Shows · press · partnerships" : "Booking enquiries are temporarily unavailable."}</p><a className="text-link" href="#contact">{bookingsAvailable ? "Booking enquiry" : "Contact information"}</a></div>
       </section>
 
       <section className="newsletter-section" id="newsletter">
@@ -99,7 +99,7 @@ export default function Home() {
         <div className="contact-links">
           {contacts.map(({ kind, label, action }) => {
             const email = contactEmail(kind);
-            return email ? <a href={`mailto:${email}`} key={kind}><span>{label}</span> {action} <i aria-hidden="true">↗</i></a> :
+            return email ? <a href={`mailto:${email}`} key={kind}><span>{label}</span> {action}</a> :
               <div className="contact-unavailable" key={kind}><span>{label}</span><strong>{action}</strong><small>Email enquiries are temporarily unavailable.</small></div>;
           })}
         </div>
