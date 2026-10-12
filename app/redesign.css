@@ -176,8 +176,11 @@ body::before { display: none; }
   .minimal-home .story-tag { display: none; }
 }
 @media (max-width: 700px) {
-  .minimal-home .site-header, body.is-scrolled .minimal-home .site-header { height: 64px; min-height: 64px; }
-  .minimal-home .brand img, body.is-scrolled .minimal-home .brand img { width: 136px; }
+  .minimal-home .site-header, body.is-scrolled .minimal-home .site-header { height: 52px; min-height: 52px; padding-inline: 20px; }
+  .minimal-home .brand { display: inline-flex; align-items: center; min-height: 44px; }
+  .minimal-home .brand img, body.is-scrolled .minimal-home .brand img { width: 112px; }
+  .minimal-home .mobile-nav-toggle { align-items: center; }
+  .minimal-home .mobile-nav-toggle span { width: 18px; }
   .minimal-home .hero { padding: 44px 6vw 48px; gap: 36px; grid-template-columns: 1fr; }
   .minimal-home .hero h1 { font-size: 64px; }
   .minimal-home .hero-deck { max-width: none; font-size: 14px; }
