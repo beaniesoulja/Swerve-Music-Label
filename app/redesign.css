@@ -63,6 +63,9 @@ body::before { display: none; }
 .minimal-home .ios-player .ios-play:hover, .minimal-home .ios-player .ios-play:active { transform: none; }
 .minimal-home .ios-player .ios-skip, .minimal-home .ios-volume button { min-width: 44px; min-height: 44px; }
 .minimal-home .ios-volume { grid-template-columns: 44px 1fr; }
+.minimal-home .ios-volume .ios-range { height: 44px; }
+.minimal-home .ios-volume .ios-range::-webkit-slider-thumb { opacity: 1; }
+.minimal-home .ios-volume .ios-range::-moz-range-thumb { opacity: 1; }
 .minimal-home .artist-feature { background: transparent; color: var(--black); grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 7vw; }
 .minimal-home .artist-slider { padding: 0; background: transparent; }
 .minimal-home .artist-slide-frame { min-height: 480px; flex: none; height: 480px; }
