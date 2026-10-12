@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import IosMusicPlayer, { type MusicPlayerHandle } from "./ios-music-player";
+import { nextPreview } from "../lib/preview-playback";
 
 export type CatalogueTrack = {
   title: string;
@@ -26,6 +27,10 @@ export default function CatalogueCoverflow({ tracks }: { tracks: CatalogueTrack[
     void playerRef.current?.play();
   };
   const move = (direction: number) => selectTrack((active + direction + tracks.length) % tracks.length);
+  const playNext = () => {
+    const next = nextPreview(active, tracks.length);
+    if (next !== null) selectTrack(next);
+  };
 
   return (
     <div className="release-browser" role="region" aria-label="Selected music previews">
@@ -35,8 +40,8 @@ export default function CatalogueCoverflow({ tracks }: { tracks: CatalogueTrack[
           <span className="eyebrow">{current.year} · 30-second preview</span>
           <h3>{current.title}</h3><p>{current.credit}</p>
         </div>
-        <IosMusicPlayer ref={playerRef} key={current.title} src={current.audio} title={current.title} artist={current.credit}
-          cover={current.cover} showVolume volume={volume} onVolumeChange={setVolume} muted={muted} onMutedChange={setMuted} />
+        <IosMusicPlayer ref={playerRef} src={current.audio} title={current.title} artist={current.credit}
+          cover={current.cover} showVolume volume={volume} onVolumeChange={setVolume} muted={muted} onMutedChange={setMuted} onComplete={playNext} />
       </div>
       <div className="release-selection">
         <div className="release-list-heading"><span>{tracks.length} selected tracks</span><span>Listen & save</span></div>

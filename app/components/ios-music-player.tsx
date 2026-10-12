@@ -3,6 +3,7 @@
 import { useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import type { CSSProperties, Ref } from "react";
 import { PreviewVolume, restoredVolume } from "../lib/preview-volume";
+import { previewFade, previewSeek } from "../lib/preview-playback";
 
 export type MusicPlayerHandle = { play: () => Promise<void> };
 
@@ -18,6 +19,7 @@ type IosMusicPlayerProps = {
   onVolumeChange?: (value: number) => void;
   muted?: boolean;
   onMutedChange?: (value: boolean) => void;
+  onComplete?: () => void;
 };
 
 const DEFAULT_VOLUME = 0.3;
@@ -79,11 +81,13 @@ export default function IosMusicPlayer({
   onVolumeChange,
   muted: controlledMuted,
   onMutedChange,
+  onComplete,
 }: IosMusicPlayerProps) {
   const shouldShowVolume = showVolume ?? variant === "featured";
   const audioRef = useRef<HTMLAudioElement>(null);
   const volumeController = useRef<PreviewVolume | null>(null);
   const lastAudibleVolume = useRef(controlledVolume || DEFAULT_VOLUME);
+  const continuePlayback = useRef(false);
   const playerId = useId();
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -103,17 +107,30 @@ export default function IosMusicPlayer({
     return volumeController.current;
   };
 
+  const playbackVolume = (level: number) => {
+    const audio = audioRef.current;
+    return level * (audio ? previewFade(audio.currentTime, audio.duration) : 1);
+  };
+
   useEffect(() => {
-    getVolumeController()?.sync(volume, muted);
+    getVolumeController()?.sync(playbackVolume(volume), muted);
     if (volume > 0) lastAudibleVolume.current = volume;
   }, [volume, muted]);
+
+  useEffect(() => {
+    if (!playing) return;
+    const timer = window.setInterval(() => {
+      getVolumeController()?.sync(playbackVolume(volume), muted);
+    }, 50);
+    return () => window.clearInterval(timer);
+  }, [playing, volume, muted]);
 
   useEffect(() => () => {
     volumeController.current?.dispose();
     volumeController.current = null;
   }, []);
 
-  const activateVolume = () => getVolumeController()?.activate(volume, muted).then(
+  const activateVolume = () => getVolumeController()?.activate(playbackVolume(volume), muted).then(
     () => setVolumeNotice(""),
     () => setVolumeNotice("Use your device volume buttons to adjust the sound in this browser."),
   );
@@ -122,6 +139,7 @@ export default function IosMusicPlayer({
     const pauseForAnotherPlayer = (event: Event) => {
       const customEvent = event as CustomEvent<string>;
       if (customEvent.detail !== playerId && audioRef.current) {
+        continuePlayback.current = false;
         audioRef.current.pause();
       }
     };
@@ -138,6 +156,10 @@ export default function IosMusicPlayer({
       window.dispatchEvent(new CustomEvent("swerve-audio-play", { detail: playerId }));
       try {
         if (audio.error) audio.load();
+        if (audio.ended || (Number.isFinite(audio.duration) && audio.currentTime >= audio.duration)) {
+          audio.currentTime = 0;
+          setCurrentTime(0);
+        }
         // Do not await before play(): both APIs need the original user gesture.
         void activateVolume();
         await audio.play();
@@ -155,29 +177,35 @@ export default function IosMusicPlayer({
 
   const togglePlayback = () => {
     const audio = audioRef.current;
-    if (audio && !audio.paused) audio.pause();
+    if (audio && !audio.paused) {
+      continuePlayback.current = false;
+      audio.pause();
+    }
     else void play();
   };
 
   const seek = (value: number) => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.currentTime = value;
-    setCurrentTime(value);
+    if (!Number.isFinite(audio.duration)) return;
+    const position = previewSeek(value, audio.duration);
+    audio.currentTime = position;
+    setCurrentTime(position);
+    getVolumeController()?.sync(playbackVolume(volume), muted);
   };
 
   const skip = (seconds: number) => {
     const audio = audioRef.current;
     if (!audio) return;
-    seek(Math.min(Math.max(audio.currentTime + seconds, 0), duration));
+    seek(audio.currentTime + seconds);
   };
 
   const changeVolume = (value: number) => {
     const audio = audioRef.current;
     if (!audio) return;
     const level = Math.max(0, Math.min(1, value));
-    getVolumeController()?.sync(level, false);
-    void getVolumeController()?.activate(level, false).then(
+    getVolumeController()?.sync(playbackVolume(level), false);
+    void getVolumeController()?.activate(playbackVolume(level), false).then(
       () => setVolumeNotice(""),
       () => setVolumeNotice("Use your device volume buttons to adjust the sound in this browser."),
     );
@@ -209,15 +237,22 @@ export default function IosMusicPlayer({
         src={src}
         muted={silent}
         preload="metadata"
-        onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 30)}
-        onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
-        onPlay={() => { setPlaying(true); setError(""); }}
+        onEmptied={() => { setCurrentTime(0); setDuration(30); setPlaying(false); setError(""); }}
+        onLoadedMetadata={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 30)}
+        onTimeUpdate={(event) => { setCurrentTime(event.currentTarget.currentTime); getVolumeController()?.sync(playbackVolume(volume), muted); }}
+        onPlay={() => { continuePlayback.current = true; setPlaying(true); setError(""); }}
         onPlaying={() => setLoading(false)}
         onWaiting={() => setLoading(true)}
         onCanPlay={() => setLoading(false)}
         onError={() => { setLoading(false); setPlaying(false); setError("This preview is unavailable. Try again or listen on a streaming service."); }}
-        onPause={() => setPlaying(false)}
-        onEnded={(event) => { event.currentTarget.currentTime = 0; setPlaying(false); setCurrentTime(0); }}
+        onPause={(event) => { if (!event.currentTarget.ended) continuePlayback.current = false; setPlaying(false); }}
+        onEnded={(event) => {
+          const advance = continuePlayback.current;
+          continuePlayback.current = false;
+          setPlaying(false);
+          setCurrentTime(event.currentTarget.currentTime);
+          if (advance) onComplete?.();
+        }}
       />
 
       {variant === "featured" && (
@@ -245,6 +280,7 @@ export default function IosMusicPlayer({
           step="0.01"
           value={currentTime}
           aria-label={`Seek through ${title}`}
+          aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
           onChange={(event) => seek(Number(event.target.value))}
           style={{ "--range-progress": `${progress}%` } as CSSProperties}
         />
