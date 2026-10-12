@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import type { CSSProperties, Ref } from "react";
+import { PreviewVolume, restoredVolume } from "../lib/preview-volume";
 
 export type MusicPlayerHandle = { play: () => Promise<void> };
 
@@ -81,6 +82,8 @@ export default function IosMusicPlayer({
 }: IosMusicPlayerProps) {
   const shouldShowVolume = showVolume ?? variant === "featured";
   const audioRef = useRef<HTMLAudioElement>(null);
+  const volumeController = useRef<PreviewVolume | null>(null);
+  const lastAudibleVolume = useRef(controlledVolume || DEFAULT_VOLUME);
   const playerId = useId();
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -89,17 +92,31 @@ export default function IosMusicPlayer({
   const [internalMuted, setInternalMuted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [volumeNotice, setVolumeNotice] = useState("");
   const muted = controlledMuted ?? internalMuted;
   const setMuted = (value: boolean) => { setInternalMuted(value); onMutedChange?.(value); };
   const volume = controlledVolume ?? internalVolume;
+  const silent = muted || volume === 0;
+
+  const getVolumeController = () => {
+    if (!volumeController.current && audioRef.current) volumeController.current = new PreviewVolume(audioRef.current);
+    return volumeController.current;
+  };
 
   useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
-  }, [volume]);
+    getVolumeController()?.sync(volume, muted);
+    if (volume > 0) lastAudibleVolume.current = volume;
+  }, [volume, muted]);
 
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.muted = muted;
-  }, [muted]);
+  useEffect(() => () => {
+    volumeController.current?.dispose();
+    volumeController.current = null;
+  }, []);
+
+  const activateVolume = () => getVolumeController()?.activate(volume, muted).then(
+    () => setVolumeNotice(""),
+    () => setVolumeNotice("Use your device volume buttons to adjust the sound in this browser."),
+  );
 
   useEffect(() => {
     const pauseForAnotherPlayer = (event: Event) => {
@@ -121,6 +138,8 @@ export default function IosMusicPlayer({
       window.dispatchEvent(new CustomEvent("swerve-audio-play", { detail: playerId }));
       try {
         if (audio.error) audio.load();
+        // Do not await before play(): both APIs need the original user gesture.
+        void activateVolume();
         await audio.play();
       } catch (cause) {
         if (!audio.isConnected || (cause instanceof DOMException && cause.name === "AbortError")) return;
@@ -156,22 +175,30 @@ export default function IosMusicPlayer({
   const changeVolume = (value: number) => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.volume = value;
-    audio.muted = false;
+    const level = Math.max(0, Math.min(1, value));
+    getVolumeController()?.sync(level, false);
+    void getVolumeController()?.activate(level, false).then(
+      () => setVolumeNotice(""),
+      () => setVolumeNotice("Use your device volume buttons to adjust the sound in this browser."),
+    );
     setMuted(false);
-    setInternalVolume(value);
-    onVolumeChange?.(value);
+    if (level > 0) lastAudibleVolume.current = level;
+    setInternalVolume(level);
+    onVolumeChange?.(level);
   };
 
   const toggleMute = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    audio.muted = !audio.muted;
-    setMuted(audio.muted);
+    if (silent) changeVolume(restoredVolume(volume, lastAudibleVolume.current));
+    else {
+      getVolumeController()?.sync(volume, true);
+      setMuted(true);
+    }
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-  const volumeProgress = muted ? 0 : volume * 100;
+  const volumeProgress = silent ? 0 : volume * 100;
 
   return (
     <div className={`ios-player ios-player-${variant}`}>
@@ -180,7 +207,7 @@ export default function IosMusicPlayer({
       <audio
         ref={audioRef}
         src={src}
-        muted={muted}
+        muted={silent}
         preload="metadata"
         onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 30)}
         onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
@@ -234,7 +261,7 @@ export default function IosMusicPlayer({
 
       {shouldShowVolume && (
         <div className="ios-volume">
-          <button type="button" onClick={toggleMute} aria-label={muted ? "Unmute preview" : "Mute preview"}><SpeakerIcon muted={muted} /></button>
+          <button type="button" onClick={toggleMute} aria-label={silent ? "Unmute preview" : "Mute preview"} aria-pressed={silent}><SpeakerIcon muted={silent} /></button>
           <input
             className="ios-range"
             type="range"
@@ -243,11 +270,13 @@ export default function IosMusicPlayer({
             step="0.01"
             value={muted ? 0 : volume}
             aria-label="Preview volume"
+            aria-valuetext={`${Math.round(volumeProgress)}%`}
             onChange={(event) => changeVolume(Number(event.target.value))}
             style={{ "--range-progress": `${volumeProgress}%` } as CSSProperties}
           />
         </div>
       )}
+      {volumeNotice && <p className="audio-status" role="status">{volumeNotice}</p>}
     </div>
   );
 }
