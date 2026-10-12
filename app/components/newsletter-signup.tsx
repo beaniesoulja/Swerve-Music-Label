@@ -83,7 +83,7 @@ export default function NewsletterSignup({ available = false, privacyUrl }: { av
       {privacyUrl && <a className="text-link" href={privacyUrl}>Read our privacy policy</a>}
       <div className="newsletter-submit-row">
         <button className="button button-dark" type="submit" disabled={state === "submitting"}>
-          {state === "submitting" ? "Joining…" : "Join the newsletter"} <span>↗</span>
+          {state === "submitting" ? "Joining…" : "Join the newsletter"}
         </button>
         <p id={statusId} className={`newsletter-status ${state}`} aria-live="polite" role="status">
           {message}

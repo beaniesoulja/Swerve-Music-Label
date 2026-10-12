@@ -107,10 +107,8 @@ body::before { display: none; }
 .minimal-home .contact-links span { font-weight: 500; color: var(--muted); font-size: 9px; letter-spacing: .08em; width: auto; min-width: 0; }
 .minimal-home .contact-unavailable strong { font-size: 16px; font-weight: 500; }
 .minimal-home .contact-unavailable small { font-size: 12px; line-height: 1.6; color: var(--muted); }
-.minimal-home .contact-links a { display: grid; grid-template-columns: 80px minmax(0, 1fr) 20px; align-items: center; gap: 10px; min-height: 56px; padding: 12px; border: 0; border-radius: 12px; background: #eeede7; font-size: 16px; line-height: 1.35; font-weight: 500; transition: background .15s ease, color .15s ease; }
+.minimal-home .contact-links a { display: grid; grid-template-columns: 80px minmax(0, 1fr); align-items: center; gap: 10px; min-height: 56px; padding: 12px; border: 0; border-radius: 12px; background: #eeede7; font-size: 16px; line-height: 1.35; font-weight: 500; transition: background .15s ease, color .15s ease; }
 .minimal-home .contact-links a:hover { padding-left: 12px; background: #efebfa; }
-.minimal-home .contact-links a i { justify-self: end; }
-.minimal-home .contact-links a:hover i { transform: none; }
 .minimal-home .contact-links a:focus-visible, .minimal-home .contact-email a:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
 .minimal-home footer { background: transparent; color: var(--black); padding: 16px 6vw; border-top: 1px solid var(--rule); }
 .minimal-home footer .footer-brand { display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; min-height: 44px; gap: 16px; padding: 0; border: 0; }
@@ -120,6 +118,34 @@ body::before { display: none; }
 .minimal-home .footer-link-group { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px 24px; padding: 0; border: 0; }
 .minimal-home .footer-link-group a { display: inline-flex; align-items: center; min-height: 44px; }
 .minimal-home footer .footer-links > span { margin: 0; }
+/* Keep wide monitors on the same readable grid instead of stretching columns. */
+@media (min-width: 701px) {
+  .minimal-home { --desktop-gutter: max(32px, calc((100% - 1080px) / 2)); }
+  .minimal-home .site-header, body.is-scrolled .minimal-home .site-header { height: 72px; min-height: 72px; padding-inline: var(--desktop-gutter); }
+  .minimal-home .hero { max-width: none; padding: 44px var(--desktop-gutter) 48px; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 48px; }
+  .minimal-home .hero h1 { font-size: clamp(58px, 5.5vw, 76px); }
+  .minimal-home .hero .eyebrow { margin-bottom: 18px; }
+  .minimal-home .hero-deck { margin: 20px 0; line-height: 1.65; }
+  .hero-feature { max-width: 320px; }
+  .hero-feature-caption { padding-top: 12px; }
+  .minimal-home .section { padding: 44px var(--desktop-gutter); }
+  .minimal-home .section-heading { margin-bottom: 26px; }
+  .minimal-home .section-heading .eyebrow { margin-bottom: 14px; }
+  .minimal-home .section-heading h2 { font-size: 38px; }
+  .minimal-home .section-intro { max-width: 290px; }
+  .minimal-home .release-browser { grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 40px; }
+  .selected-cover { max-height: 220px; }
+  .selected-release-heading { margin: 16px 0 12px; }
+  .selected-release-heading h3 { font-size: 26px; }
+  .release-links { margin-top: 16px; }
+  .minimal-home .artist-feature { gap: 40px; }
+  .minimal-home .artist-slide-frame { height: 420px; min-height: 420px; }
+  .minimal-home .artist-bio { padding: 16px 0; }
+  .minimal-home .live-section, .minimal-home .newsletter-section { padding: 40px var(--desktop-gutter); gap: 40px; }
+  .live-enquiry { padding-left: 32px; }
+  .minimal-home .contact-section { padding: 28px var(--desktop-gutter); }
+  .minimal-home footer { padding: 16px var(--desktop-gutter); }
+}
 @media (max-width: 1000px) {
   .minimal-home .site-header .desktop-nav { width: auto; order: initial; gap: 22px; }
   .minimal-home .section-heading { flex-direction: row; align-items: end; }
@@ -155,7 +181,7 @@ body::before { display: none; }
   .live-enquiry { padding: 26px 0 0; border-left: 0; border-top: 1px solid #d0cbc1; }
   .minimal-home .newsletter-section { padding: 44px 6vw; grid-template-columns: 1fr; gap: 24px; }
   .minimal-home .contact-section { padding: 28px 6vw; }
-  .minimal-home .contact-links a { grid-template-columns: 62px minmax(0, 1fr) 16px; gap: 8px; font-size: 15px; }
+  .minimal-home .contact-links a { grid-template-columns: 62px minmax(0, 1fr); gap: 8px; font-size: 15px; }
   .minimal-home .contact-unavailable { grid-template-columns: 62px 1fr; gap: 8px; }
   .minimal-home .contact-unavailable small { grid-column: 2; }
   .minimal-home .contact-unavailable strong { font-size: 16px; }

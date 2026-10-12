@@ -60,7 +60,7 @@ export default function MobileNav() {
           ))}
         </nav>
         <a className="mobile-nav-cta" href="#contact" onClick={() => setOpen(false)} tabIndex={open ? 0 : -1}>
-          Work with us <span>↗</span>
+          Work with us
         </a>
       </div>
     </div>
