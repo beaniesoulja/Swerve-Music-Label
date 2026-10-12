@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { siteUrl } from "./site-config";
 
+const title = "Swerve Music · African Roots. Global Sound.";
+const description = "Independent music, art and culture. Rooted in Africa, open to the world.";
+
 export function generateMetadata(): Metadata { const url = siteUrl(); return {
-  title: "Swerve Music · Art. Music. Culture.",
-  description: "An Afrobeats-rooted independent artist label promoting music, culture, showcases and live bookings.",
+  title,
+  description,
   ...(url ? { metadataBase: url, alternates: { canonical: url.href } } : { robots: { index: false, follow: false } }),
-  openGraph: { title: "Swerve Music · Art. Music. Culture.", description: "An Afrobeats-rooted independent artist label promoting music, culture, showcases and live bookings.", type: "website", siteName: "Swerve Music", images: [{ url: "/swerve-music-lockup-purple.png", alt: "Swerve Music" }], ...(url ? { url: url.href } : {}) },
-  twitter: { card: "summary", title: "Swerve Music · Art. Music. Culture.", images: ["/favicon-192.png"] },
+  openGraph: { title, description, type: "website", siteName: "Swerve Music", images: [{ url: "/swerve-music-lockup-purple.png", alt: "Swerve Music" }], ...(url ? { url: url.href } : {}) },
+  twitter: { card: "summary", title, description, images: ["/favicon-192.png"] },
   icons: {
     icon: [
       { url: "/favicon-48.png", sizes: "48x48", type: "image/png" },
