@@ -23,7 +23,16 @@ test("production homepage renders real content and safe unavailable service stat
   assert.equal(response.status, 200);
   const html = await response.text();
   assertNoEmoji(html);
-  assert.match(html, /<title>Swerve Music/);
+  const title = "Swerve Music · African Roots. Global Sound.";
+  const description = "Independent music, art and culture. Rooted in Africa, open to the world.";
+  assert.ok(html.includes(`<title>${title}</title>`));
+  for (const [attribute, name, content] of [
+    ["name", "description", description],
+    ["property", "og:title", title],
+    ["property", "og:description", description],
+    ["name", "twitter:title", title],
+    ["name", "twitter:description", description],
+  ]) assert.ok(html.includes(`<meta ${attribute}="${name}" content="${content}"`), name);
   assert.match(html, /Selected releases\./);
   assert.match(html, /Beanie/);
   assert.match(html, /Newsletter signups are temporarily unavailable/);
