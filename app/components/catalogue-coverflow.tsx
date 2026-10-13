@@ -35,16 +35,12 @@ export default function CatalogueCoverflow({ tracks }: { tracks: CatalogueTrack[
   return (
     <div className="release-browser" role="region" aria-label="Selected music previews">
       <div className="release-preview" id="selected-release">
-        <img className="selected-cover" src={current.cover} alt={`${current.title} cover artwork`} width={600} height={600} loading="lazy" />
-        <div className="selected-release-heading" aria-live="polite">
-          <span className="eyebrow">{current.year} · 30-second preview</span>
-          <h3>{current.title}</h3><p>{current.credit}</p>
-        </div>
+        <span className="sr-only" aria-live="polite">{current.title} — {current.credit}</span>
         <IosMusicPlayer ref={playerRef} src={current.audio} title={current.title} artist={current.credit}
           cover={current.cover} showVolume volume={volume} onVolumeChange={setVolume} muted={muted} onMutedChange={setMuted} onComplete={playNext} />
       </div>
       <div className="release-selection">
-        <div className="release-list-heading"><span>{tracks.length} selected tracks</span><span>Listen & save</span></div>
+        <div className="release-list-heading"><span>{tracks.length} tracks · 30-second previews</span><span>Listen & save</span></div>
         <ol className="release-list" aria-label="Choose a track">
           {tracks.map((track, index) => (
             <li key={track.title} className={active === index ? "is-selected" : undefined}>

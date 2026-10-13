@@ -34,6 +34,9 @@ test("production homepage renders real content and safe unavailable service stat
     ["name", "twitter:description", description],
   ]) assert.ok(html.includes(`<meta ${attribute}="${name}" content="${content}"`), name);
   assert.match(html, /Selected releases\./);
+  assert.doesNotMatch(html, /class="hero-feature"|class="selected-cover"|class="selected-release-heading"/);
+  assert.ok(html.indexOf('class="release-preview"') < html.indexOf('class="release-selection"'));
+  assert.match(html, /tracks · 30-second previews/);
   assert.match(html, /Beanie/);
   assert.match(html, /Newsletter signups are temporarily unavailable/);
   assert.match(html, /Email enquiries are temporarily unavailable/);
