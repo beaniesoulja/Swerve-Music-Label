@@ -46,16 +46,11 @@ export default function Home() {
           <p className="hero-deck">Swerve Music promotes art, music and culture. Rooted in Afrobeats, built with independent artists and open to the world.</p>
           <div className="hero-actions"><a className="button button-dark" href="#music">Hear Beanie Soulja</a><a className="text-link" href="#artists">Meet the artist</a></div>
         </div>
-        <a className="hero-feature" href="#music" aria-label="Explore TKL and selected releases">
-          <img src="/covers/tkl.jpg" alt="TKL cover artwork" width={600} height={600} fetchPriority="high" />
-          <span className="hero-feature-caption"><span><small>Featured release · 2026</small><strong>TKL</strong><span>Beanie Soulja feat. Easyscope</span></span></span>
-        </a>
       </section>
 
       <section className="section catalogue-section" id="music" aria-labelledby="catalogue-title" tabIndex={-1}>
         <div className="section-heading">
           <div><p className="eyebrow">01 / Music</p><h2 id="catalogue-title">Selected releases.</h2></div>
-          <p className="section-intro">Seven 30-second previews.<br />Explore more on the artist&apos;s streaming profiles.</p>
         </div>
         <CatalogueCoverflow tracks={catalogue} />
       </section>
