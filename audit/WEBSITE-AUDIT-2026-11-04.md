@@ -25,6 +25,8 @@ Scope: current application source, deployed www site, Cloudflare build configura
 
 ## Remaining limitations
 
+Follow-up: the compatible TypeScript lint dependency was patched, reducing the toolchain report to 12 moderate entries; see [dependency evidence](DEPENDENCY-FOLLOWUP-2026-11-04.md). Newsletter database setup is complete, while sender authentication, runtime credentials, an approved policy and delivery testing remain pending. The figures below describe the initial audit release.
+
 - Newsletter is intentionally disabled until Neon, authenticated outbound email, approved privacy policy and a real delivery test are supplied. Inbound enquiry forwarding does not provide outbound sending; DMARC currently rejects unauthenticated domain mail.
 - Production dependencies: zero npm advisories. Full toolchain: 13 moderate entries, all tracing to the minimatch glob-amplification advisory in development lint dependencies. No high or critical findings remain. Older consumers require minimatch's callable v3 API; blindly forcing v11 or accepting npm's ESLint downgrade would break tooling. This code does not accept visitor-supplied glob patterns. Recheck when upstream compatible releases are available.
 - CSP deliberately does not constrain scripts/styles yet; full nonce-based script enforcement needs framework and Cloudflare challenge compatibility validation.
