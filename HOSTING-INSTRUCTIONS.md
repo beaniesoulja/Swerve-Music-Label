@@ -21,6 +21,8 @@ Cloudflare builds with `npm run build` and deploys the generated `dist/server/wr
 
 ## Newsletter activation
 
+Setup progress, 4 November 2026: the existing Neon project `plain-forest-41400836` now has both newsletter tables and the confirmation/unsubscribe columns. The additive schema was tested on `codex-newsletter-setup-2026-11-04` before production. The originally untracked schema was reconciled with Drizzle and its two existing migration hashes registered; subsequent `db:migrate` runs succeed without recreating tables. Resend domain `swervemusic.org` has been created with tracking disabled, but DNS verification and runtime credentials are still pending. Public signup remains disabled. See [prepared DNS records](audit/NEWSLETTER-DNS-2026-11-04.md) and the [unpublished privacy draft](audit/NEWSLETTER-PRIVACY-DRAFT.md).
+
 1. Supply a Neon PostgreSQL `DATABASE_URL` for application queries and direct `DATABASE_URL_UNPOOLED` for migrations. Use a database branch or separate database to test first.
 2. Run `npm run db:migrate` against that test database. The migrations are `0000_colorful_adam_destine.sql` and `0001_careful_bloodstrike.sql`. Migration 0001 adds confirmation/suppression support and durable rate counters without deleting existing subscribers.
 3. Supply a Resend `RESEND_API_KEY` and a verified sender in `NEWSLETTER_FROM_EMAIL`. No account is provisioned automatically. The domain currently only receives forwarded email and has DMARC `p=reject`: configure and verify the sending provider's aligned SPF/DKIM before enabling outbound mail. Preserve Cloudflare's receiving MX/SPF records. The adapter is in `app/lib/newsletter-service.ts`.
