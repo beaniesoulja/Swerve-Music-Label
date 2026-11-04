@@ -39,7 +39,9 @@ export default function MobileNav() {
   }, [open]);
 
   return (
-    <div className="mobile-nav">
+    <div className="mobile-nav" onBlurCapture={(event) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+    }}>
       <button
         ref={toggleRef}
         type="button"

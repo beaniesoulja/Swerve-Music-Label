@@ -1,6 +1,10 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { catalogue } from "../app/catalogue";
+import { audioResponse } from "./audio";
+
+const audioPaths = new Set(catalogue.map((track) => track.audio));
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -28,6 +32,10 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
+    if ((request.method === "GET" || request.method === "HEAD") && audioPaths.has(url.pathname)) {
+      return audioResponse(request, env.ASSETS);
+    }
+
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
       return handleImageOptimization(request, {
@@ -39,7 +47,16 @@ const worker = {
       }, allowedWidths);
     }
 
-    return handler.fetch(request, env, ctx);
+    const response = await handler.fetch(request, env, ctx);
+    const headers = new Headers(response.headers);
+    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("X-Frame-Options", "DENY");
+    headers.set("Content-Security-Policy", "frame-ancestors 'none'; object-src 'none'; base-uri 'self'");
+    if (!headers.has("Referrer-Policy")) {
+      headers.set("Referrer-Policy", /^\/(api\/)?newsletter\//.test(url.pathname) ? "no-referrer" : "strict-origin-when-cross-origin");
+    }
+    headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   },
 };
 

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { access, readdir } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import test, { after } from "node:test";
 import { unstable_dev } from "wrangler";
 
@@ -14,6 +14,7 @@ const startWorker = (vars = {}) => unstable_dev("dist/server/index.js", {
 const worker = await startWorker();
 after(() => worker.stop());
 const request = (path, options) => worker.fetch(path, options);
+const previewFiles = ["tkl-preview.mp3", "the-motto-preview.mp3", "capsize-preview.mp3", "burst-down-preview-v3.mp3", "fowosere-preview.mp3", "psycho-preview.mp3", "nsg-preview.mp3"];
 
 // Plain copyright text is retained; decorative emoji-capable glyphs are not.
 const assertNoEmoji = (html) => assert.doesNotMatch(html.replaceAll("©", ""), /[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u20E3]/u);
@@ -53,7 +54,94 @@ test("production homepage renders real content and safe unavailable service stat
   assert.equal((html.match(/aria-label="Show (?:Official portrait|Studio series|In the room|Across borders) image"/g) || []).length, 4);
   assert.doesNotMatch(html, /₦5 million|church choir|LATEST<br\/>RELEASE/);
   for (const id of ["top", "artists", "music", "culture", "live", "newsletter", "contact"]) assert.ok(html.includes(`id="${id}"`));
-  for (const file of ["tkl-preview.mp3", "the-motto-preview.mp3", "capsize-preview.mp3", "burst-down-preview-v3.mp3", "fowosere-preview.mp3", "psycho-preview.mp3", "nsg-preview.mp3"]) await access(new URL(`../public/audio/${file}`, import.meta.url));
+  for (const file of previewFiles) await access(new URL(`../public/audio/${file}`, import.meta.url));
+});
+
+for (const file of previewFiles) test(`preview audio supports seeking with exact byte ranges: ${file}`, async () => {
+  const bytes = await readFile(new URL(`../public/audio/${file}`, import.meta.url));
+  const path = `/audio/${file}`;
+  for (const [range, start, end] of [
+    ["bytes=1000-1999", 1000, 1999],
+    [`bytes=${bytes.length - 64}-`, bytes.length - 64, bytes.length - 1],
+    ["bytes=-64", bytes.length - 64, bytes.length - 1],
+  ]) {
+    const response = await request(path, { headers: { Range: range } });
+    assert.equal(response.status, 206, range);
+    assert.equal(response.headers.get("accept-ranges"), "bytes");
+    assert.equal(response.headers.get("content-range"), `bytes ${start}-${end}/${bytes.length}`);
+    assert.equal(response.headers.get("content-length"), String(end - start + 1));
+    assert.match(response.headers.get("content-type") || "", /^audio\/mpeg/);
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()), bytes.subarray(start, end + 1));
+  }
+  const head = await request(path, { method: "HEAD", headers: { Range: "bytes=1000-1999" } });
+  assert.equal(head.status, 200, "HEAD ignores Range and describes the complete representation");
+  assert.equal(head.headers.get("accept-ranges"), "bytes");
+  assert.equal(head.headers.get("content-length"), String(bytes.length));
+  assert.equal((await head.arrayBuffer()).byteLength, 0);
+
+  const beyondEnd = await request(path, { headers: { Range: `bytes=${bytes.length}-` } });
+  assert.equal(beyondEnd.status, 416);
+  assert.equal(beyondEnd.headers.get("content-range"), `bytes */${bytes.length}`);
+});
+
+test("audio range requests respect validators and safely ignore unsupported range syntax", async () => {
+  const path = "/audio/tkl-preview.mp3";
+  const bytes = await readFile(new URL(`../public${path}`, import.meta.url));
+  const head = await request(path, { method: "HEAD" });
+  const etag = head.headers.get("etag");
+  assert.ok(etag, "audio has a cache validator");
+  const matching = await request(path, { headers: { Range: "bytes=0-63", "If-Range": etag } });
+  assert.equal(matching.status, 206);
+  assert.deepEqual(Buffer.from(await matching.arrayBuffer()), bytes.subarray(0, 64));
+  for (const headers of [
+    { Range: "bytes=0-63", "If-Range": '"outdated-audio"' },
+    { Range: "invalid" },
+    { Range: "bytes=0-4,10-14" },
+  ]) {
+    const response = await request(path, { headers });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-range"), null);
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()), bytes);
+  }
+});
+
+test("revalidating cached audio updates its seekable range support", async () => {
+  const path = "/audio/tkl-preview.mp3";
+  const full = await request(path);
+  assert.equal(full.status, 200);
+  const etag = full.headers.get("etag");
+  assert.ok(etag);
+  await full.arrayBuffer();
+  const cached = await request(path, { headers: { "If-None-Match": etag } });
+  assert.equal(cached.status, 304);
+  assert.equal(cached.headers.get("accept-ranges"), "bytes");
+  assert.equal((await cached.arrayBuffer()).byteLength, 0);
+});
+
+test("pages prevent framing and MIME sniffing without leaking newsletter tokens in referrers", async () => {
+  for (const [path, referrerPolicy] of [
+    ["/", "strict-origin-when-cross-origin"],
+    ["/newsletter/confirm?token=" + "a".repeat(64), "no-referrer"],
+    ["/newsletter/unsubscribe?token=1." + "a".repeat(32) + "." + "b".repeat(64), "no-referrer"],
+  ]) {
+    const response = await request(path);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+    assert.equal(response.headers.get("x-frame-options"), "DENY");
+    assert.match(response.headers.get("content-security-policy") || "", /(?:^|;)\s*frame-ancestors 'none'(?:;|$)/);
+    assert.equal(response.headers.get("referrer-policy"), referrerPolicy);
+    await response.arrayBuffer();
+  }
+  for (const action of ["confirm", "unsubscribe"]) {
+    const response = await request(`/api/newsletter/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "token=" + "a".repeat(64),
+    });
+    assert.equal(response.status, 503, "isolated test services remain disabled");
+    assert.equal(response.headers.get("referrer-policy"), "no-referrer");
+    await response.arrayBuffer();
+  }
 });
 
 test("newsletter API distinguishes malformed input and unavailable service", async () => {
@@ -104,10 +192,12 @@ test("all public assets are served and retired preview URLs redirect to the curr
     for (const entry of await readdir(directory, { withFileTypes: true })) {
       const path = `${prefix}${entry.name}`;
       if (entry.isDirectory()) await check(new URL(`${entry.name}/`, directory), `${path}/`);
+      else if (path === "_headers") continue;
       else assert.equal((await request(`/${path}`, { method: "HEAD" })).status, 200, path);
     }
   }
   await check(root);
+  assert.equal((await request("/_headers")).status, 404, "Cloudflare configuration is not a public asset");
   for (const name of ["burst-down-preview.mp3", "burst-down-preview-v2.mp3"]) {
     const response = await request(`/audio/${name}`, { redirect: "manual" });
     assert.equal(response.status, 307);

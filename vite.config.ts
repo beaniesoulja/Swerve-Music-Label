@@ -6,6 +6,7 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 
 const localBindingConfig = {
   main: "./worker/index.ts",
+  assets: { binding: "ASSETS", run_worker_first: ["/audio/*"] },
   compatibility_flags: ["nodejs_compat"],
   // Newsletter storage uses Neon PostgreSQL, not a Cloudflare D1 binding.
   d1_databases: [],
