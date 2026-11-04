@@ -1,6 +1,6 @@
 # Swerve Music website
 
-Swerve Music's artist website with Beanie Soulja, seven 30-second previews, a five-photo artist slider, and the 186-image Live n Loud event gallery.
+Swerve Music's artist website with Beanie Soulja, seven 30-second previews, a four-photo artist slider, and the 186-image Live n Loud event gallery.
 
 ## Local development
 
@@ -11,7 +11,7 @@ npm ci
 npm run dev -- --port 4173
 ```
 
-The site works without secrets. Contact links and newsletter signup show an unavailable message until their services are configured. Do not put secrets in public environment variables.
+The site works without secrets. Contact links default to the verified `hello@swervemusic.org` inbox. Newsletter signup stays unavailable until its provider and policy settings are configured. Do not put secrets in public environment variables.
 
 ## Verification
 
@@ -21,6 +21,8 @@ VINEXT_TARGET=vercel npm run build
 ```
 
 `npm test` runs TypeScript, ESLint, in-memory PostgreSQL newsletter tests, a Cloudflare build, and production-render/API checks. Tests use synthetic data and a stub email transport; they do not contact a live database or send email. Run tests in a shell without real newsletter environment variables.
+
+The Cloudflare Worker serves byte ranges for the seven local previews so seeking works. Keep the `ASSETS` binding and `/audio/*` Worker-first routing in `vite.config.ts`. All other static assets retain direct delivery. See [the November audit](audit/WEBSITE-AUDIT-2026-11-04.md) for verification and remaining limitations.
 
 ## Database and newsletter
 

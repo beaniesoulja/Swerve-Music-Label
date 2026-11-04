@@ -6,7 +6,9 @@
 - Cloudflare: `npm run build` produces `dist/server/index.js` and `dist/client/`. Configure runtime Neon and mail-provider secrets. There is no newsletter D1 binding; PostgreSQL migrations must not be applied to D1.
 - Local Node smoke test: `VINEXT_TARGET=vercel npm run build`, then `PORT=4174 HOST=localhost node .output/server/index.mjs`.
 
-Use Node.js 22.13+ and `npm ci`. Build on the deployment platform so native dependencies match its OS/architecture. No deployment has been performed as part of these fixes.
+Use Node.js 22.13+ and `npm ci`. Build on the deployment platform so native dependencies match its OS/architecture. Production is the existing Cloudflare Worker `swerve-music-label-website`, connected to GitHub `main`, with canonical URL `https://www.swervemusic.org`. The apex redirects to www.
+
+Cloudflare builds with `npm run build` and deploys the generated `dist/server/wrangler.json`; keep runtime variables with `--keep-vars`. The generated configuration must retain `assets.binding = "ASSETS"` and `assets.run_worker_first = ["/audio/*"]` for preview seeking. `public/_headers` secures direct static responses; `worker/index.ts` secures application responses.
 
 ## Environment
 
@@ -14,14 +16,14 @@ Use Node.js 22.13+ and `npm ci`. Build on the deployment platform so native depe
 
 1. Set `SITE_URL` to the verified canonical HTTPS origin, without paths or credentials. Without it, preview indexing is disabled and sitemap contains no guessed URLs.
 2. Publish approved privacy/terms documents and set `PRIVACY_POLICY_URL` and `TERMS_URL`. The URLs must use HTTPS. Links appear only when configured.
-3. Configure real receiving mailboxes and set `CONTACT_ARTISTS_EMAIL`, `CONTACT_BOOKINGS_EMAIL`, `CONTACT_CULTURE_EMAIL`. Verify actual delivery before setting `CONTACT_EMAIL_ENABLED=true`. The 7 October audit found null MX on the former contact domain; changing website code cannot fix this.
-4. Add actual Instagram/TikTok/YouTube profile URLs in the corresponding `SOCIAL_*_URL` settings.
+3. Contact categories already default to `hello@swervemusic.org`; inbound forwarding was owner-tested. Optional overrides are `CONTACT_ARTISTS_EMAIL`, `CONTACT_BOOKINGS_EMAIL`, and `CONTACT_CULTURE_EMAIL`. Set `CONTACT_EMAIL_ENABLED=false` only to disable enquiries.
+4. Instagram already defaults to `https://www.instagram.com/swervemusicltd/`. Add TikTok/YouTube only when their official profile URLs are supplied.
 
 ## Newsletter activation
 
 1. Supply a Neon PostgreSQL `DATABASE_URL` for application queries and direct `DATABASE_URL_UNPOOLED` for migrations. Use a database branch or separate database to test first.
 2. Run `npm run db:migrate` against that test database. The migrations are `0000_colorful_adam_destine.sql` and `0001_careful_bloodstrike.sql`. Migration 0001 adds confirmation/suppression support and durable rate counters without deleting existing subscribers.
-3. Supply a Resend `RESEND_API_KEY` and a verified sender in `NEWSLETTER_FROM_EMAIL`. No account is provisioned automatically. The adapter is in `app/lib/newsletter-service.ts` and can be replaced if another provider is preferred.
+3. Supply a Resend `RESEND_API_KEY` and a verified sender in `NEWSLETTER_FROM_EMAIL`. No account is provisioned automatically. The domain currently only receives forwarded email and has DMARC `p=reject`: configure and verify the sending provider's aligned SPF/DKIM before enabling outbound mail. Preserve Cloudflare's receiving MX/SPF records. The adapter is in `app/lib/newsletter-service.ts`.
 4. Generate a strong random `NEWSLETTER_TOKEN_SECRET` of at least 32 characters, keep it server-only, and keep it stable. Rotation invalidates old unsubscribe signatures, so plan continuity before rotating.
 5. Ensure `SITE_URL` and an approved `PRIVACY_POLICY_URL` are set, then enable `NEWSLETTER_ENABLED=true` in the test environment.
 6. Verify real email receipt, explicit confirmation, database persistence, duplicate signup, unsubscribe, and resubscription. Check outbound sender authentication and deliverability in the provider dashboard.
