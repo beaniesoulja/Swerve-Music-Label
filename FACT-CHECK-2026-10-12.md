@@ -15,6 +15,8 @@ The quick check did not corroborate the original church-choir/influences biograp
 
 The event name and OhOhBeeHive/Akure venue are retained as supplied archive metadata, not independently verified facts. Please provide an approved biography and an event announcement or organizer source before restoring detailed claims.
 
+**Update, 9 November 2026:** at the owner's request the Live n Loud recap was restored to the Culture section with its performer list, pull quote, FC26 showdown and ₦5 million prize line. Those details remain uncorroborated by this fact check; they are published on the owner's instruction, not as verified facts.
+
 Contact addresses, booking availability, newsletter credentials and policy configuration remain owner setup requirements. Existing readiness gates are preserved; the page does not pretend these services are available.
 
 ## Design changes
