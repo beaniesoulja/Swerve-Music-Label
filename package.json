@@ -16,7 +16,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "newsletter:export": "node --import tsx scripts/export-newsletter.ts",
-    "images:optimize": "node scripts/optimize-artist-images.mjs"
+    "images:optimize": "node scripts/optimize-artist-images.mjs",
+    "images:optimize:gallery": "node scripts/optimize-gallery-images.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

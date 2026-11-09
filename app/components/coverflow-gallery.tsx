@@ -132,7 +132,10 @@ export default function CoverflowGallery({ photos }: { photos: CoverflowPhoto[] 
               aria-hidden={offset !== 0}
               aria-current={offset === 0}
             >
-              <img src={photo.src} alt={photo.alt} loading="lazy" draggable={false} />
+              <picture>
+                <source type="image/webp" srcSet={photo.src.replace(/\.jpg$/, "-480.webp")} sizes="(max-width: 700px) 160px, 190px" />
+                <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" width={480} height={600} draggable={false} />
+              </picture>
             </button>
           );
         })}

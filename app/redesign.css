@@ -2,10 +2,9 @@
 :root { --cream: #f8f7f2; --black: #252525; }
 body::before { display: none; }
 .minimal-home { --rule: #deddd7; --muted: #696862; }
-.minimal-home .site-header, body.is-scrolled .minimal-home .site-header { height: 82px; min-height: 82px; padding: 0 6vw; background: var(--cream); box-shadow: none; backdrop-filter: none; border-color: var(--rule); }
-.minimal-home .brand img, body.is-scrolled .minimal-home .brand img { width: 190px; height: auto; }
+.minimal-home .site-header { height: 82px; min-height: 82px; padding: 0 6vw; background: var(--cream); box-shadow: none; backdrop-filter: none; border-color: var(--rule); }
+.minimal-home .brand img { width: 190px; height: auto; }
 .minimal-home .site-header nav { gap: 28px; font-size: 13px; font-weight: 500; }
-.minimal-home .site-header nav a::after { height: 1px; }
 .minimal-home .header-cta { font-size: 13px; font-weight: 500; border: 0; padding: 12px 0; }
 .minimal-home .eyebrow { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .14em; margin-bottom: 24px; }
 .minimal-home .hero { min-height: 0; max-width: 1440px; margin: auto; padding: 74px 6vw 86px; grid-template-columns: 1fr; gap: 0; align-items: center; }
@@ -117,7 +116,6 @@ body::before { display: none; }
 .minimal-home .footer-link-group a { display: inline-flex; align-items: center; min-height: 44px; }
 .minimal-home footer .footer-links > span { margin: 0; }
 /* Quiet controls: neutral feedback, modest corners and no hover movement. */
-.minimal-home .header-cta:hover { transform: none; }
 .minimal-home .site-header nav a:hover, .minimal-home .mobile-nav-panel nav a:active,
 .minimal-home footer div a:hover { color: var(--black); text-decoration: underline; text-underline-offset: 4px; }
 .minimal-home .mobile-nav-cta { min-height: 44px; padding: 0 14px; border-radius: 6px; font-size: 12px; font-weight: 500; }
@@ -134,7 +132,7 @@ body::before { display: none; }
 /* Keep wide monitors on the same readable grid instead of stretching columns. */
 @media (min-width: 701px) {
   .minimal-home { --desktop-gutter: max(32px, calc((100% - 1080px) / 2)); }
-  .minimal-home .site-header, body.is-scrolled .minimal-home .site-header { height: 72px; min-height: 72px; padding-inline: var(--desktop-gutter); }
+  .minimal-home .site-header { height: 72px; min-height: 72px; padding-inline: var(--desktop-gutter); }
   .minimal-home .hero { max-width: none; padding: 44px var(--desktop-gutter) 48px; grid-template-columns: 1fr; gap: 0; }
   .minimal-home .hero h1 { font-size: clamp(58px, 5.5vw, 76px); }
   .minimal-home .hero .eyebrow { margin-bottom: 18px; }
@@ -163,9 +161,9 @@ body::before { display: none; }
   .minimal-home .story-tag { display: none; }
 }
 @media (max-width: 700px) {
-  .minimal-home .site-header, body.is-scrolled .minimal-home .site-header { height: 52px; min-height: 52px; padding-inline: 20px; }
+  .minimal-home .site-header { height: 52px; min-height: 52px; padding-inline: 20px; }
   .minimal-home .brand { display: inline-flex; align-items: center; min-height: 44px; }
-  .minimal-home .brand img, body.is-scrolled .minimal-home .brand img { width: 112px; }
+  .minimal-home .brand img { width: 112px; }
   .minimal-home .mobile-nav-toggle { align-items: center; }
   .minimal-home .mobile-nav-toggle span { width: 18px; }
   .minimal-home .hero { padding: 44px 6vw 48px; gap: 36px; grid-template-columns: 1fr; }

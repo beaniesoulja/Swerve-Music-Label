@@ -35,7 +35,7 @@ export default function EventStoryRow() {
   }, [open]);
 
   return (
-    <article className="story-list-item event-story" data-reveal>
+    <article className="story-list-item event-story">
       <button type="button" className="event-story-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-controls="event-story-panel">
         <span className="story-marker" aria-hidden="true">01</span>
         <span className="story-tag">Photo archive</span>

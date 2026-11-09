@@ -119,6 +119,20 @@ test("legacy unconfirmed subscribers can confirm without treating old records as
   assert.ok(row.confirmedAt);
 });
 
+test("proxy IP limits apply and rejected attempts do not spend the shared counter", async () => {
+  await db.delete(limits);
+  const globalRow = async () => (await db.select().from(limits).where(eq(limits.key, privateKey("global"))))[0];
+  const request = new Request("https://example.test/api/newsletter", { headers: { "cf-connecting-ip": "203.0.113.9" } });
+  for (let n = 0; n < 20; n++) assert.equal(await signupRateAllowed(`ip-${n}@example.test`, request, db), true);
+  assert.equal(await signupRateAllowed("ip-20@example.test", request, db), false, "one address is capped per hour");
+  const before = (await globalRow()).attempts;
+  assert.equal(await signupRateAllowed("ip-20@example.test", request, db), false);
+  assert.equal((await globalRow()).attempts, before, "blocked attempts must not exhaust the shared cap");
+  const elsewhere = new Request("https://example.test/api/newsletter", { headers: { "cf-connecting-ip": "198.51.100.7" } });
+  assert.equal(await signupRateAllowed("other@example.test", elsewhere, db), true);
+  await db.delete(limits);
+});
+
 test("durable atomic rate limits bound email requests, expire, and store no raw address", async () => {
   const email = "rate@example.test";
   const request = new Request("https://example.test/api/newsletter");

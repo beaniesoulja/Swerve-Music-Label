@@ -24,12 +24,25 @@ export function useCoverflow(count: number) {
   // movement is detected — otherwise every plain click/tap forces a re-render
   // between pointerdown and pointerup, which can shift the overlapping 3D cards
   // just enough that the browser never fires a "click" on the tapped card.
+  const resetDrag = () => {
+    dragState.current.pointerId = null;
+    dragState.current.moved = false;
+    setIsDragging(false);
+    setDragX(0);
+  };
+
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     dragState.current = { startX: event.clientX, pointerId: event.pointerId, moved: false };
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (dragState.current.pointerId === null) return;
+    // A release outside the stage never reaches pointerup here, so hover events
+    // (no button pressed) must not resume a stale drag.
+    if (event.buttons === 0) {
+      resetDrag();
+      return;
+    }
     const delta = event.clientX - dragState.current.startX;
     if (!dragState.current.moved) {
       if (Math.abs(delta) < MOVE_THRESHOLD) return;
@@ -48,12 +61,10 @@ export function useCoverflow(count: number) {
       } catch {
         // pointer already released
       }
-      setIsDragging(false);
       if (dragX <= -DRAG_THRESHOLD) next();
       else if (dragX >= DRAG_THRESHOLD) prev();
-      setDragX(0);
     }
-    dragState.current.pointerId = null;
+    resetDrag();
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {

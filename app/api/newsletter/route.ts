@@ -1,11 +1,11 @@
 import { confirmationMessage, newsletterReady, newsletterUnavailable } from "../../lib/newsletter-config";
 import { requestSubscription, signupRateAllowed } from "../../lib/newsletter-service";
+import { crossSiteRequest, hasContentType } from "../../lib/newsletter-request";
 import { readSmallBody, validateSignup } from "../../lib/newsletter-validation";
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return Response.json({ error: "Please submit the form from this website." }, { status: 403 });
-  if (!request.headers.get("content-type")?.includes("application/json")) return Response.json({ error: "Expected a JSON form." }, { status: 415 });
+  if (crossSiteRequest(request)) return Response.json({ error: "Please submit the form from this website." }, { status: 403 });
+  if (!hasContentType(request, "application/json")) return Response.json({ error: "Expected a JSON form." }, { status: 415 });
   let payload: unknown;
   try { payload = JSON.parse(await readSmallBody(request)); }
   catch (error) { return Response.json({ error: "Please send a valid signup form." }, { status: error instanceof RangeError ? 413 : 400 }); }
