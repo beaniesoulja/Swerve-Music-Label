@@ -52,7 +52,11 @@ test("production homepage renders real content and safe unavailable service stat
   assert.doesNotMatch(html, /<audio[^>]*autoplay/i);
   assert.doesNotMatch(html, /interview-microphone|In conversation|speaking into a microphone/);
   assert.equal((html.match(/aria-label="Show (?:Official portrait|Studio series|In the room|Across borders) image"/g) || []).length, 4);
-  assert.doesNotMatch(html, /₦5 million|church choir|LATEST<br\/>RELEASE/);
+  assert.doesNotMatch(html, /church choir|LATEST<br\/>RELEASE/);
+  assert.match(html, /Inside Sterling Chilling: Live n Loud in Akure\./);
+  assert.match(html, /OOB Records/);
+  assert.match(html, /Kabex/);
+  assert.match(html, /186(?:<!-- -->)? frames from the night/);
   for (const id of ["top", "artists", "music", "culture", "live", "newsletter", "contact"]) assert.ok(html.includes(`id="${id}"`));
   for (const file of previewFiles) await access(new URL(`../public/audio/${file}`, import.meta.url));
 });

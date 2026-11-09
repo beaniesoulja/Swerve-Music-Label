@@ -74,7 +74,7 @@ export default function Home() {
       </section>
 
       <section className="section culture-section" id="culture">
-        <div className="section-heading"><div><p className="eyebrow">03 / Culture</p><h2>Live n Loud.</h2></div><p className="section-intro">The event photo archive.</p></div>
+        <div className="section-heading"><div><p className="eyebrow">03 / Culture</p><h2>Live n Loud.</h2></div><p className="section-intro">The event recap and photo archive.</p></div>
         <div className="story-list"><EventStoryRow /></div>
       </section>
 
