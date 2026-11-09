@@ -19,10 +19,10 @@ body::before { display: none; }
 .minimal-home .section-heading { margin-bottom: 38px; gap: 30px; }
 .minimal-home .section-heading h2 { font-size: clamp(32px, 3.4vw, 48px); font-weight: 500; letter-spacing: -.045em; line-height: 1.12; }
 .minimal-home .section-intro { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 0; }
-.minimal-home .release-browser { --muted: #b5b5b0; --rule: #383838; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; max-width: 680px; margin-inline: auto; padding: 8px; background: #191919; color: var(--cream); border: 1px solid #303030; border-radius: 16px; }
+.minimal-home .release-browser { --muted: #b5b5b0; --rule: #383838; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; width: min(100%, 420px); max-width: none; margin: 0; padding: 6px; background: #191919; color: var(--cream); border: 1px solid #303030; border-radius: 16px; }
 .release-preview { min-width: 0; }
 .release-selection { min-width: 0; padding: 0 8px 8px; }
-.minimal-home .release-browser .ios-player { background: transparent; padding: 16px 16px 8px; border-radius: 0; }
+.minimal-home .release-browser .ios-player { background: transparent; padding: 11px 12px 6px; border-radius: 10px; }
 .release-links { display: flex; gap: 26px; margin-top: 24px; flex-wrap: wrap; }
 .release-list-heading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--rule); border-bottom: 0; padding: 14px 10px 8px; font-size: 11px; color: var(--muted); }
 .release-list { display: grid; gap: 4px; list-style: none; padding: 8px 0 0; margin: 0; }
@@ -45,6 +45,7 @@ body::before { display: none; }
 .release-navigation { display: flex; justify-content: space-between; margin-top: 14px; }
 .release-navigation button { min-height: 40px; padding: 8px 12px; background: transparent; color: var(--cream); border: 1px solid #484848; border-radius: 6px; font-size: 12px; cursor: pointer; }
 .release-navigation button:hover { background: #303030; }
+
 .minimal-home .ios-player { border-radius: 8px; box-shadow: none; background: #292929; }
 .minimal-home .ios-player::before { display: none; }
 .minimal-home .ios-player-track img { border-radius: 0; box-shadow: none; }
@@ -187,4 +188,52 @@ body::before { display: none; }
   .minimal-home .contact-unavailable small { grid-column: 2; }
   .minimal-home .contact-unavailable strong { font-size: 16px; }
   .minimal-home footer img { width: 136px; }
+}
+
+/* Compact player: one small block, anchored to the section's left edge. */
+.minimal-home .release-browser .ios-player .ios-range { height: 18px; }
+.minimal-home .release-browser .ios-player .ios-range::-webkit-slider-thumb { width: 12px; height: 12px; margin-top: -4px; }
+.minimal-home .release-browser .ios-player .ios-range::-moz-range-thumb { width: 12px; height: 12px; }
+.minimal-home .release-browser .ios-player { padding: 11px 12px 6px; border-radius: 10px; }
+.minimal-home .release-browser .ios-player-track strong { font-size: 13px; letter-spacing: -.01em; }
+.minimal-home .release-browser .ios-player-track > div > span { font-size: 9.5px; }
+.minimal-home .release-browser .ios-preview-label { display: none; }
+.minimal-home .release-browser .ios-progress-wrap { margin-top: 7px; }
+.minimal-home .release-browser .ios-time { font-size: 7px; margin-top: 2px; }
+.minimal-home .release-browser .ios-controls { gap: 12px; margin: 1px 0 0; }
+.minimal-home .release-browser .ios-play { width: 32px; height: 32px; }
+.minimal-home .release-browser .ios-play svg { width: 16px; height: 16px; }
+.minimal-home .release-browser .ios-skip { width: 24px; height: 24px; min-width: 0; min-height: 0; }
+.minimal-home .release-browser .ios-skip svg { width: 18px; height: 18px; }
+.minimal-home .release-browser .ios-volume { grid-template-columns: 18px 1fr; gap: 6px; padding-top: 4px; }
+.minimal-home .release-browser .ios-volume button { width: 18px; height: 18px; min-width: 0; min-height: 0; }
+.minimal-home .release-browser .ios-volume svg { width: 13px; height: 13px; }
+/* Two-line mini player: title and transport share the first row. */
+.minimal-home .release-browser .ios-player { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 10px; }
+.minimal-home .release-browser .ios-player-track { grid-column: 1; grid-row: 1; }
+.minimal-home .release-browser .ios-controls { grid-column: 2; grid-row: 1; margin: 0; justify-content: flex-end; }
+.minimal-home .release-browser .ios-progress-wrap { grid-column: 1 / -1; grid-row: 2; margin-top: 6px; }
+.minimal-home .release-browser .ios-volume { grid-column: 1 / -1; grid-row: 3; }
+.minimal-home .release-browser .audio-status { grid-column: 1 / -1; }
+.minimal-home .release-browser .release-list-heading { padding: 7px 8px 2px; font-size: 9px; }
+.minimal-home .release-browser .release-list { gap: 1px; padding-top: 4px; }
+.minimal-home .release-browser .release-list li { grid-template-columns: minmax(0, 1fr) 58px; }
+.minimal-home .release-browser .release-list button { grid-template-columns: 15px minmax(0, 1fr); gap: 7px; padding: 3px 8px; min-height: 32px; }
+.minimal-home .release-browser .release-number { font-size: 9px; }
+.minimal-home .release-browser .release-list-title { gap: 0; }
+.minimal-home .release-browser .release-list-title strong { font-size: 12px; }
+.minimal-home .release-browser .release-list-title > span { font-size: 9px; }
+.minimal-home .release-browser .track-platforms a { width: 30px; height: 30px; border-radius: 7px; }
+.minimal-home .release-browser .track-platforms svg { width: 12px; height: 12px; }
+.minimal-home .release-browser .release-navigation { margin-top: 6px; }
+.minimal-home .release-browser .release-navigation button { min-height: 28px; padding: 2px 8px; font-size: 10px; }
+
+/* Keep touch targets usable while the block stays compact. */
+@media (pointer: coarse) {
+  .minimal-home .release-browser .ios-play { width: 40px; height: 40px; }
+  .minimal-home .release-browser .ios-skip { width: 34px; height: 34px; }
+  .minimal-home .release-browser .ios-volume button { width: 32px; height: 32px; }
+  .minimal-home .release-browser .release-list button { min-height: 44px; }
+  .minimal-home .release-browser .track-platforms a { width: 38px; height: 38px; }
+  .minimal-home .release-browser .release-navigation button { min-height: 38px; }
 }
