@@ -15,13 +15,18 @@ async function allow(key: string, maximum: number, db = getDb()) {
     } }).returning({ attempts: limits.attempts });
   return row.attempts <= maximum;
 }
+/** Only headers the hosting proxy overwrites are trusted. Cloudflare always sets cf-connecting-ip. */
+function clientIp(request: Request) {
+  const configured = process.env.TRUSTED_CLIENT_IP_HEADER;
+  const ip = configured ? request.headers.get(configured) : request.headers.get("cf-connecting-ip");
+  return ip?.trim().slice(0, 200) || null;
+}
 export async function signupRateAllowed(email: string, request: Request, db = getDb()) {
-  if (!await allow("global", 200, db)) return false;
-  // Configure only a header overwritten by the trusted hosting proxy.
-  const trustedHeader = process.env.TRUSTED_CLIENT_IP_HEADER;
-  const ip = trustedHeader ? request.headers.get(trustedHeader) : null;
-  if (ip && !await allow(`ip:${ip.slice(0,200)}`, 20, db)) return false;
+  // Per-request limits are checked first so blocked attempts cannot exhaust the shared cap.
   if (!await allow(`email:${email}`, 3, db)) return false;
+  const ip = clientIp(request);
+  if (ip && !await allow(`ip:${ip}`, 20, db)) return false;
+  if (!await allow("global", 200, db)) return false;
   await db.delete(limits).where(lte(limits.resetAt, new Date()));
   return true;
 }

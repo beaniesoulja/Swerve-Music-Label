@@ -2,7 +2,10 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
-export function getDb() {
+// One client per process/isolate; the HTTP driver does not pool sockets.
+let client: ReturnType<typeof createDb> | undefined;
+
+function createDb() {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
@@ -11,4 +14,8 @@ export function getDb() {
   }
 
   return drizzle(neon(url), { schema });
+}
+
+export function getDb() {
+  return (client ??= createDb());
 }

@@ -1,12 +1,12 @@
 import { confirmSubscription, unsubscribe } from "./newsletter-service";
 import { newsletterReady } from "./newsletter-config";
+import { crossSiteRequest, hasContentType } from "./newsletter-request";
 import { readSmallBody } from "./newsletter-validation";
 
 export async function newsletterAction(request: Request, action: "confirm" | "unsubscribe") {
   const url = new URL(request.url);
-  const origin = request.headers.get("origin");
-  if (origin && origin !== url.origin) return new Response("Please use the form on this website.", { status: 403 });
-  if (!request.headers.get("content-type")?.includes("application/x-www-form-urlencoded")) return new Response("Invalid form.", { status: 415 });
+  if (crossSiteRequest(request)) return new Response("Please use the form on this website.", { status: 403 });
+  if (!hasContentType(request, "application/x-www-form-urlencoded")) return new Response("Invalid form.", { status: 415 });
   const destination = new URL(`/newsletter/${action}`, url.origin);
   let token: string;
   try { token = new URLSearchParams(await readSmallBody(request)).get("token") || ""; }
