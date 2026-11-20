@@ -41,9 +41,9 @@ Priority: high. Evidence: reproduced API response plus configuration inspection.
 
 A valid-shaped synthetic signup returned HTTP 500 and `We could not add you right now. Please try again.` The project has no local environment file and the checked shell environment has no `DATABASE_URL`. `db/index.ts` requires that variable and creates a Neon Postgres client. No subscriber was saved by the test.
 
-The deployment instructions and `hosting-config.json` still describe a Cloudflare D1 binding named `DB`. The schema and SQL migration are now PostgreSQL, and `HOSTING-INSTRUCTIONS.md` names a migration file that does not exist. Provisioning the documented D1 binding does not configure the current API.
+The deployment instructions still describe a Cloudflare D1 binding named `DB`. The schema and SQL migration are now PostgreSQL, and `HOSTING-INSTRUCTIONS.md` names a migration file that does not exist. Provisioning the documented D1 binding does not configure the current API.
 
-Action: decide and document the actual deployment/database path, supply the connection securely, apply the current migration, and verify persistence plus duplicate signup behavior in an isolated test database. Production database configuration was not inspected. Sources: `db/index.ts:6`, `app/api/newsletter/route.ts:41`, `HOSTING-INSTRUCTIONS.md:24`, `hosting-config.json`, `drizzle.config.ts`.
+Action: decide and document the actual deployment/database path, supply the connection securely, apply the current migration, and verify persistence plus duplicate signup behavior in an isolated test database. Production database configuration was not inspected. Sources: `db/index.ts:6`, `app/api/newsletter/route.ts:41`, `HOSTING-INSTRUCTIONS.md:24`, `drizzle.config.ts`.
 
 ### 3. Newsletter lifecycle and abuse controls are incomplete
 
@@ -57,7 +57,7 @@ Action: connect a mailing provider or implement the lifecycle, verify email owne
 
 ### 4. Required privacy and terms pages are absent
 
-Priority: high under the project's own launch checklist. There are no privacy/terms pages or footer links. The site collects names, email addresses, and consent. `the checklist` expressly lists both pages as launch blockers.
+Priority: high under the project's own launch checklist. There are no privacy/terms pages or footer links. The site collects names, email addresses, and consent. The checklist expressly lists both pages as launch blockers.
 
 Action: add owner-approved policies describing the actual business and data handling, and link the privacy notice from the signup form. This is an implementation gap against the project checklist, not a legal-compliance determination. Custom-domain status and the host's badge setting also remain unverified.
 

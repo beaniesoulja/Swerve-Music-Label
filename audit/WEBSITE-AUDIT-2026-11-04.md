@@ -9,7 +9,7 @@ Scope: current application source, deployed www site, Cloudflare build configura
 | Preview seeking fails in production | Live Range request returned full 200; Chrome reported seekable `[0,0]`; slider and +10 returned to zero | Route only audio through the Worker, return exact 206 byte ranges, 416 for unsatisfiable ranges, and advertise seeking on 200/304/HEAD |
 | Missing application security headers | Live homepage lacked framing and MIME-sniffing protections | Add CSP framing/base/object restrictions, X-Frame-Options, nosniff, referrer and unused-device permission controls; retain no-referrer on newsletter actions |
 | Mobile keyboard leaves menu open | Tab past Work with us focused the hero while menu stayed expanded and body scrolling stayed locked | Close menu when keyboard focus leaves it |
-| Spotify tracking metadata exposed in links | Seven catalogue links contained third-party UTM and request IDs | Keep canonical track URLs with the same track IDs |
+| Spotify tracking metadata exposed in links | Seven catalogue links carried leftover UTM tracking parameters and request IDs | Keep canonical track URLs with the same track IDs |
 | Vulnerable development dependencies | npm reported 19 findings, including two high-severity package entries | Patch Undici to 7.30.1, fast-uri to 3.1.9 and Zod to 4.6.7 without install scripts |
 | Setup documents out of date | Docs described an undeployed site, missing inbox/domain/Instagram and five artist photos | Correct the handoff to the live configuration and four-photo slider |
 
